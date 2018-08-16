@@ -213,9 +213,9 @@ class UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByItemCore(class UXD
 	return nullptr;
 }
 
-void UXD_InventoryComponentBase::AddItemArray(const TArray<FItem>& Items)
+void UXD_InventoryComponentBase::AddItemArray(const TArray<FXD_Item>& Items)
 {
-	for (const FItem& Item : Items)
+	for (const FXD_Item& Item : Items)
 	{
 		if (Item.ItemCore)
 		{

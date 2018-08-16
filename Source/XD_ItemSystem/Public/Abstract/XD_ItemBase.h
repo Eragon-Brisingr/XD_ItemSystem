@@ -13,7 +13,7 @@
 *
 */
 
-UCLASS()
+UCLASS(Abstract)
 class XD_ITEMSYSTEM_API AXD_ItemBase : public AActor, public IXD_SaveGameInterface
 {
 	GENERATED_BODY()
@@ -107,6 +107,7 @@ public:
 protected:
 	class UObject* GetItemMesh();
 
+public:
 	UFUNCTION(BlueprintPure, Category = "物品", meta = (DisplayName = "Create Item Core", DeterminesOutputType = "ItemClass"))
 	static UXD_ItemCoreBase* CreateItemCoreByType(TSubclassOf<AXD_ItemBase> ItemClass, UObject* Outer);
 

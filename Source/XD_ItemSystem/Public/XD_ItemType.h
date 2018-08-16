@@ -10,14 +10,14 @@
  */
 
 USTRUCT(BlueprintType)
-struct FItem
+struct FXD_Item
 {
 	GENERATED_BODY()
 public:
-	FItem()
+	FXD_Item()
 		:bShowNumber(true)
 	{}
-	FItem(class UXD_ItemCoreBase* ItemCore) 
+	FXD_Item(class UXD_ItemCoreBase* ItemCore) 
 		:ItemCore(ItemCore), bShowNumber(true)
 	{}
 
@@ -40,9 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category = "Item", meta = (DisplayName = "道具详情"))
 	class UXD_ItemCoreBase* ItemCore;
 
-	friend uint32 GetTypeHash(const FItem& Item);
+	friend uint32 GetTypeHash(const FXD_Item& Item);
 
-	friend bool operator==(const FItem& LHS, const FItem& RHS);
+	friend bool operator==(const FXD_Item& LHS, const FXD_Item& RHS);
 };
 
 UENUM(BlueprintType)

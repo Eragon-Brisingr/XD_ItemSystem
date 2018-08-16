@@ -11,7 +11,7 @@
  * 
  */
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType, EditInlineNew, collapsecategories)
 class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
 {
 	GENERATED_BODY()

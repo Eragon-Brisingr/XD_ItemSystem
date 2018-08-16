@@ -5,12 +5,12 @@
 
 
 
-uint32 GetTypeHash(const FItem& Item)
+uint32 GetTypeHash(const FXD_Item& Item)
 {
 	return GetTypeHash(Item.ItemCore);
 }
 
-bool operator==(const FItem& LHS, const FItem& RHS)
+bool operator==(const FXD_Item& LHS, const FXD_Item& RHS)
 {
 	if (LHS.ItemCore == RHS.ItemCore)
 	{

@@ -34,7 +34,7 @@ public:
 	virtual void WhenLoad_Implementation() override;
 public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
-	void AddItemArray(const TArray<FItem>& Items);
+	void AddItemArray(const TArray<FXD_Item>& Items);
 
 	//考虑网络的Owner
 	void GetItemFromOther(class APawn* Instigator, UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
