@@ -35,7 +35,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 			FPropertyCustomizeHelper::SetObjectValue(ItemCore_PropertyHandle, nullptr);
 		}
 	}));
-	FXD_Item Item = FPropertyCustomizeHelper::GetValue<FXD_Item>(StructPropertyHandle);
+	FXD_Item& Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
 
  	TSharedRef<SWidget> PropertyValueWidget = ItemClass_PropertyHandle->CreatePropertyValueWidget(false);
 
@@ -43,7 +43,6 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 // #include <Private/UserInterface/PropertyEditor/SPropertyEditorClass.h>
 // #define offsetof(type, member) (size_t)&(((type*)0)->member)
 // 	constexpr long offset = offsetof(SPropertyEditorClass, bAllowNone);
-
  	//SPropertyValueWidget::ValueEditorWidget
  	TSharedPtr<SWidget>& ValueEditorWidget = GetObjectMemberByOffset<TSharedPtr<SWidget>>(&PropertyValueWidget.Get(), 784);
  	//SPropertyEditorClass::MetaClass
@@ -55,6 +54,15 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
  	if (TSubclassOf<AXD_ItemBase> ShowItemType = Item.ShowItemType)
  	{
  		MetaClass = ShowItemType;
+		if (Item.ItemCore && !Item.ItemCore->IsA(Item.ShowItemType))
+		{
+			Item.ItemClass = Item.ShowItemType;
+			Item.ItemCore = AXD_ItemBase::CreateItemCoreByType(ShowItemType, FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef()));
+			if (Item.ItemCore->HasAnyFlags(RF_ClassDefaultObject | RF_ArchetypeObject))
+			{
+				Item.ItemCore->SetFlags(RF_ArchetypeObject);
+			}
+		}
  	}
 
 	if (!Item.bShowNumber)
