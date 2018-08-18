@@ -95,7 +95,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 				[
 					SNew(SNumericEntryBox<int32>)
 					.AllowSpin(true)
-					.MinValue(0)
+					.MinValue(1)
 					.MaxValue(TOptional<int32>())
 					.MinSliderValue(0)
 					.MaxSliderValue(TOptional<int32>())

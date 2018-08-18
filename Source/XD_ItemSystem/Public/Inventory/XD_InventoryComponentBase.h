@@ -32,12 +32,6 @@ public:
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	virtual void WhenLoad_Implementation() override;
-public:
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
-	void AddItemArray(const TArray<FXD_Item>& Items);
-
-	//考虑网络的Owner
-	void GetItemFromOther(class APawn* Instigator, UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
 //新实现
 public:
@@ -49,11 +43,11 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
 	FOnRemoveItem OnRemoveItem;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnGetItemFromOther, class APawn*, Instigator, class UXD_ItemCoreBase*, ItemCore, int32, ItemNumber, bool, IsBuy);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnGetItemFromOther, class AActor*, Instigator, class UXD_ItemCoreBase*, ItemCore, int32, ItemNumber, bool, IsBuy);
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
 	FOnGetItemFromOther OnGetItemFromOther;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnRemoveItemByOther, class APawn*, Instigator, class UXD_ItemCoreBase*, ItemCore, int32, ItemNumber, bool, IsBuy);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnRemoveItemByOther, class AActor*, Instigator, class UXD_ItemCoreBase*, ItemCore, int32, ItemNumber, bool, IsBuy);
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
 	FOnRemoveItemByOther OnRemoveItemByOther;
 
@@ -65,14 +59,23 @@ public:
 	UFUNCTION()
 	void OnRep_ItemList();
 
+public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	class UXD_ItemCoreBase* AddItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
+	//返回值是移除的道具数目
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	int32 RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
+	void AddItemArray(const TArray<FXD_Item>& Items);
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	class UXD_ItemCoreBase* AddItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number = 1);
+
+	//考虑网络的Owner
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
+	void GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
 	ULevel* GetThrowedLevel();
 

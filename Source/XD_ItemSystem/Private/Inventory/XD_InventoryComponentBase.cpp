@@ -91,7 +91,6 @@ class UXD_ItemCoreBase* UXD_InventoryComponentBase::AddItemCore(const class UXD_
 	}
 }
 
-//返回值是移除的道具数目
 int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
 	int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](auto& ElementItem) {return ElementItem->EqualForItemCore(ItemCore); });
@@ -122,6 +121,17 @@ class UXD_ItemCoreBase* UXD_InventoryComponentBase::AddItemCoreByType(TSubclassO
 		return AddItemCore(Item->GetDefaultObject<AXD_ItemBase>()->GetItemCore(), Number);
 	}
 	return nullptr;
+}
+
+void UXD_InventoryComponentBase::GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+{
+	int32 AddNumber = OtherInventory->RemoveItemCore(ItemCore, Number);
+	if (AddNumber > 0)
+	{
+		AddItemCore(ItemCore, AddNumber);
+		OnGetItemFromOther.Broadcast(GetOwner(), ItemCore, AddNumber, false);
+		OtherInventory->OnRemoveItemByOther.Broadcast(GetOwner(), ItemCore, AddNumber, false);
+	}
 }
 
 ULevel* UXD_InventoryComponentBase::GetThrowedLevel()
@@ -221,17 +231,6 @@ void UXD_InventoryComponentBase::AddItemArray(const TArray<FXD_Item>& Items)
 		{
 			AddItemCore(Item.ItemCore, Item.ItemCore->Number);
 		}
-	}
-}
-
-void UXD_InventoryComponentBase::GetItemFromOther(class APawn* Instigator, UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
-{
-	int32 AddNumber = OtherInventory->RemoveItemCore(ItemCore, Number);
-	if (AddNumber > 0)
-	{
-		AddItemCore(ItemCore, AddNumber);
-		OnGetItemFromOther.Broadcast(Instigator, ItemCore, AddNumber, false);
-		OtherInventory->OnRemoveItemByOther.Broadcast(Instigator, ItemCore, AddNumber, false);
 	}
 }
 
