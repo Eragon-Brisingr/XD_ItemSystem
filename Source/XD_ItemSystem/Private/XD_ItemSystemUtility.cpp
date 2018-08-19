@@ -5,3 +5,7 @@
 DEFINE_LOG_CATEGORY(XD_ItemSystem_Log);
 
 
+UXD_ItemSystemSettings::UXD_ItemSystemSettings()
+{
+
+}

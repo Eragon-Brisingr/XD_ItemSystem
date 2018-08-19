@@ -33,10 +33,14 @@ public:
 
 	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
+	virtual void PostInitProperties() override;
 	//初始化模型
 public:
 #if WITH_EDITORONLY_DATA
 	bool bMeshInit;
+
+	UPROPERTY()
+	UStaticMeshComponent* BlueprintPreviewHelper;
 #endif
 
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -54,14 +58,14 @@ public:
 public:
 #if WITH_EDITORONLY_DATA
 	//取消勾选则采用蓝图名
-	UPROPERTY(EditAnywhere, Category = "物品", meta = (DisplayName = "不采用蓝图名"))
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "不采用蓝图名"))
 	bool bNotPickBlueprintName = true;
 #endif
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
-public:
+
 public:
 	UPROPERTY(EditAnywhere, Instanced, SaveGame, ReplicatedUsing = OnRep_InnerItemCore, Category = "物品", meta = (DisplayName = "物品核心"))
 	class UXD_ItemCoreBase* InnerItemCore;
@@ -72,23 +76,29 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "物品")
 	void WhenInnerItemCoreInited();
 
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名", EditCondition = "bNotPickBlueprintName"))
+	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名", EditCondition = "bNotPickBlueprintName"))
 	FText ItemName;
 
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "重量"))
+	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "重量"))
 	float Weight;
 
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "价格"))
+	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "价格"))
 	float Price;
 
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "描述"))
+	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "描述"))
 	FText Describe;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "物品", meta = (DisplayName = "模型", AllowedClasses = "StaticMesh, SkeletalMesh"))
-	class UObject* Mesh;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
+	TSoftObjectPtr<class UObject> ItemMesh;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型材质覆盖"))
+	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MeshMaterialOverrideList;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "物品", meta = (DisplayName = "道具叠加时模型", AllowedClasses = "StaticMesh, SkeletalMesh"))
-	class UObject* ItemCompositeMesh;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "道具叠加时模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
+	TSoftObjectPtr<class UObject> ItemCompositeMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型材质覆盖"))
+	TMap<FName, TSoftObjectPtr<UMaterialInterface>> CompositeMeshMaterialOverrideList;
 
 	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "最小叠加数目", ClampMin = "0", EditCondition = "bUseCompositeMesh"))
 	int32 MinItemCompositeNumber = 5;
@@ -97,16 +107,16 @@ public:
 	int32 GetNumber() const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	bool CanCompositeItem() const { return ItemCompositeMesh != nullptr; }
+	bool CanCompositeItem() const { return !ItemCompositeMesh.IsNull(); }
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "物品", meta = (DisplayName = "模型材质覆盖"))
-	TMap<FName, UMaterialInterface*> MaterialOverrideList;
+	bool IsCompositeItem() const { return CanCompositeItem() && GetNumber() >= MinItemCompositeNumber; }
 
-	UPROPERTY(BlueprintReadOnly, Category = "物品")
-	UPrimitiveComponent* RootMeshComponent;
+	UFUNCTION(BlueprintCallable, Category = "物品")
+	UPrimitiveComponent* GetRootMeshComponent() const;
 protected:
-	class UObject* GetItemMesh();
+	class UObject* GetItemMeshAync() const;
 
+	void UpdateMaterialsOverrideSync();
 public:
 	UFUNCTION(BlueprintPure, Category = "物品", meta = (DisplayName = "Create Item Core", DeterminesOutputType = "ItemClass"))
 	static UXD_ItemCoreBase* CreateItemCoreByType(TSubclassOf<AXD_ItemBase> ItemClass, UObject* Outer);

@@ -48,6 +48,7 @@ void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 		}
 	}
 }
+#endif //WITH_EDITOR
 
 void UXD_ItemCoreBase::OnRep_Number(int32 PreNumber)
 {
@@ -177,4 +178,3 @@ void UXD_ItemCoreBase::WhenRemoveFromInventory(class AActor* ItemOwner, int32 Re
 	GetItemDefaultActor()->WhenRemoveFromInventory(ItemOwner, this, RemoveNumber, ExistNumber);
 }
 
-#endif //WITH_EDITOR

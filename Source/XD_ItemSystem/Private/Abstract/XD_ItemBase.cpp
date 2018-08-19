@@ -5,6 +5,8 @@
 #include "XD_ObjectFunctionLibrary.h"
 #include <UnrealNetwork.h>
 #include <Engine/ActorChannel.h>
+#include "XD_ActorFunctionLibrary.h"
+#include "XD_ItemSystemUtility.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
 
@@ -13,8 +15,28 @@ AXD_ItemBase::AXD_ItemBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	InnerItemCore = CreateDefaultSubobject<UXD_ItemCoreBase>(TEXT("ItemCore"));
+	bReplicates = true;
+
+	ItemName = LOCTEXT("物品", "物品");
+
+	InnerItemCore = CreateDefaultSubobject<UXD_ItemCoreBase>(GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore));
+
+	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("物品根代理组件"), true);
+
+	SetRootComponent(SceneComponent);
+
+#if WITH_EDITOR
+	BlueprintPreviewHelper = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("蓝图预览图用"), true);
+	{
+		BlueprintPreviewHelper->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'")).Object);
+		BlueprintPreviewHelper->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BlueprintPreviewHelper->SetWorldScale3D(FVector(0.0001f, 0.0001f, 0.0001f));
+		BlueprintPreviewHelper->bIsEditorOnly = true;
+		BlueprintPreviewHelper->SetupAttachment(SceneComponent);
+	}
+#endif
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +78,17 @@ bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutB
 	return IsFailed;
 }
 
+void AXD_ItemBase::PostInitProperties()
+{
+	Super::PostInitProperties();
+#if WITH_EDITOR
+	if (BlueprintPreviewHelper)
+	{
+		BlueprintPreviewHelper->DestroyComponent();
+	}
+#endif
+}
+
 void AXD_ItemBase::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -78,60 +111,47 @@ void AXD_ItemBase::PreInitializeComponents()
 
 void AXD_ItemBase::InitRootMesh()
 {
-	if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(GetItemMesh()))
+	if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(GetItemMeshAync()))
 	{
 		if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(GetRootComponent()))
 		{
 			StaticMeshComponent->SetStaticMesh(StaticMesh);
-			RootMeshComponent = StaticMeshComponent;
 		}
 		else
 		{
-			StaticMeshComponent = NewObject<UStaticMeshComponent>(this, TEXT("静态网格体模型组件"));
-			AddOwnedComponent(StaticMeshComponent);
-			StaticMeshComponent->RegisterComponent();
+			StaticMeshComponent = UXD_ActorFunctionLibrary::AddComponent<UStaticMeshComponent>(this, TEXT("静态网格体模型组件"));
 			StaticMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			StaticMeshComponent->SetWorldTransform(GetActorTransform());
 
-			GetRootComponent()->DestroyComponent();
+			if (GetRootComponent())
+			{
+				GetRootComponent()->DestroyComponent();
+			}
 			SetRootComponent(StaticMeshComponent);
-			RootMeshComponent = StaticMeshComponent;
 
 			StaticMeshComponent->SetStaticMesh(StaticMesh);
 		}
 	}
-	else if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(GetItemMesh()))
+	else if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(GetItemMeshAync()))
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(GetRootComponent()))
 		{
 			SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
-			RootMeshComponent = SkeletalMeshComponent;
 		}
 		else
 		{
-			SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this, TEXT("骨骼体模型组件"));
-			AddOwnedComponent(SkeletalMeshComponent);
-			SkeletalMeshComponent->RegisterComponent();
+			SkeletalMeshComponent = UXD_ActorFunctionLibrary::AddComponent<USkeletalMeshComponent>(this, TEXT("骨骼体模型组件"));
 			SkeletalMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			SkeletalMeshComponent->SetWorldTransform(GetActorTransform());
 
-			auto AttachChildren = GetRootComponent()->GetAttachChildren();
-			for (USceneComponent* SceneComponent : AttachChildren)
+			if (GetRootComponent())
 			{
-				SceneComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
+				GetRootComponent()->DestroyComponent();
 			}
-
-			GetRootComponent()->DestroyComponent();
 			SetRootComponent(SkeletalMeshComponent);
-			RootMeshComponent = SkeletalMeshComponent;
 
 			SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
 		}
-	}
-
-	for (auto& MaterialOverride : MaterialOverrideList)
-	{
-		RootMeshComponent->SetMaterialByName(MaterialOverride.Key, MaterialOverride.Value);
 	}
 
 	BeThrowedSetting();
@@ -142,7 +162,7 @@ void AXD_ItemBase::BeThrowedSetting()
 	if (auto Root = Cast<UPrimitiveComponent>(GetRootComponent()))
 	{
 		Root->SetSimulatePhysics(true);
-		Root->SetCollisionProfileName(TEXT("Item"));
+		Root->SetCollisionProfileName(GetDefault<UXD_ItemSystemSettings>()->ItemCollisionProfileName);
 		Root->BodyInstance.bUseCCD = true;
 		Root->SetCanEverAffectNavigation(false);
 		SetReplicateMovement(true);
@@ -154,14 +174,16 @@ void AXD_ItemBase::WhenLoad_Implementation()
 	InitRootMesh();
 }
 
+#if WITH_EDITOR
+
 void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, Mesh))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, ItemMesh))
 	{
-		MaterialOverrideList.Empty();
+		MeshMaterialOverrideList.Empty();
 	}
 	else if (PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, bNotPickBlueprintName))
 	{
@@ -170,15 +192,10 @@ void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 			ItemName = FText::FromString(GetClass()->GetName().Left(GetClass()->GetName().Len() - 2));
 		}
 	}
-	else if (PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, MaterialOverrideList))
+	else if (PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, MeshMaterialOverrideList)
+				|| PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, CompositeMeshMaterialOverrideList))
 	{
-		if (RootMeshComponent)
-		{
-			for (auto& MaterialOverride : MaterialOverrideList)
-			{
-				RootMeshComponent->SetMaterialByName(MaterialOverride.Key, MaterialOverride.Value);
-			}
-		}
+		UpdateMaterialsOverrideSync();
 	}
 	else if (PropertyName == GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore))
 	{
@@ -192,6 +209,8 @@ void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 		}
 	}
 }
+
+#endif
 
 void AXD_ItemBase::OnRep_InnerItemCore()
 {
@@ -211,9 +230,32 @@ int32 AXD_ItemBase::GetNumber() const
 	return InnerItemCore ? InnerItemCore->Number : 0;
 }
 
-class UObject* AXD_ItemBase::GetItemMesh()
+UPrimitiveComponent* AXD_ItemBase::GetRootMeshComponent() const
 {
-	return GetNumber() >= MinItemCompositeNumber ? ItemCompositeMesh : Mesh;
+	return CastChecked<UPrimitiveComponent>(GetRootComponent());
+}
+
+class UObject* AXD_ItemBase::GetItemMeshAync() const
+{
+	return IsCompositeItem() ? ItemCompositeMesh.LoadSynchronous() : ItemMesh.LoadSynchronous();
+}
+
+void AXD_ItemBase::UpdateMaterialsOverrideSync()
+{
+	if (IsCompositeItem())
+	{
+		for (auto& MaterialOverride : CompositeMeshMaterialOverrideList)
+		{
+			GetRootMeshComponent()->SetMaterialByName(MaterialOverride.Key, MaterialOverride.Value.LoadSynchronous());
+		}
+	}
+	else
+	{
+		for (auto& MaterialOverride : MeshMaterialOverrideList)
+		{
+			GetRootMeshComponent()->SetMaterialByName(MaterialOverride.Key, MaterialOverride.Value.LoadSynchronous());
+		}
+	}
 }
 
 UXD_ItemCoreBase* AXD_ItemBase::CreateItemCoreByType(TSubclassOf<AXD_ItemBase> ItemClass, UObject* Outer)
@@ -261,7 +303,7 @@ void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCore
 	{
 		FVector ThrowLocation = WhoThrowed->GetActorLocation() + WhoThrowed->GetActorRotation().RotateVector(FVector(100.f, 0.f, 0.f));
 		FRotator ThrowRotation = WhoThrowed->GetActorRotation();
-		if (ThrowNumber < MinItemCompositeNumber || ItemCompositeMesh == nullptr)
+		if (ThrowNumber < MinItemCompositeNumber || ItemCompositeMesh.IsNull())
 		{
 			for (int i = 0; i < ThrowNumber; ++i)
 			{

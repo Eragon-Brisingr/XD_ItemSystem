@@ -15,11 +15,18 @@ struct FXD_Item
 	GENERATED_BODY()
 public:
 	FXD_Item()
-		:bShowNumber(true)
-	{}
+	{
+#if WITH_EDITORONLY_DATA
+		bShowNumber = true;
+#endif
+	}
 	FXD_Item(class UXD_ItemCoreBase* ItemCore) 
-		:ItemCore(ItemCore), bShowNumber(true)
-	{}
+		:ItemCore(ItemCore)
+	{
+#if WITH_EDITORONLY_DATA
+		bShowNumber = true;
+#endif
+	}
 
 	explicit operator bool() const { return ItemCore ? true : false; }
 
