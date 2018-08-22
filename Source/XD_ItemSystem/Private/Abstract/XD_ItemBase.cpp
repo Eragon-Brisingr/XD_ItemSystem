@@ -303,15 +303,7 @@ void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCore
 	{
 		FVector ThrowLocation = WhoThrowed->GetActorLocation() + WhoThrowed->GetActorRotation().RotateVector(FVector(100.f, 0.f, 0.f));
 		FRotator ThrowRotation = WhoThrowed->GetActorRotation();
-		if (ThrowNumber < MinItemCompositeNumber || ItemCompositeMesh.IsNull())
-		{
-			for (int i = 0; i < ThrowNumber; ++i)
-			{
-				AXD_ItemBase* SpawnedItem = ItemCore->SpawnItemActorInLevel(ThrowToLevel, ThrowLocation, ThrowRotation);
-				SpawnedItem->BeThrowedSetting();
-			}
-		}
-		else
+		if (ThrowNumber > MinItemCompositeNumber && CanCompositeItem())
 		{
 			FActorSpawnParameters ActorSpawnParameters;
 			ActorSpawnParameters.OverrideLevel = ThrowToLevel;
@@ -321,6 +313,14 @@ void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCore
 			ItemActor->InnerItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, ItemActor);
 			ItemActor->InnerItemCore->Number = ThrowNumber;
 			ItemActor->FinishSpawning(FTransform(ThrowRotation, ThrowLocation));
+		}
+		else
+		{
+			for (int i = 0; i < ThrowNumber; ++i)
+			{
+				AXD_ItemBase* SpawnedItem = ItemCore->SpawnItemActorInLevel(ThrowToLevel, 1, ThrowLocation, ThrowRotation);
+				SpawnedItem->BeThrowedSetting();
+			}
 		}
 	}
 }

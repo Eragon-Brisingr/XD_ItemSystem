@@ -5,6 +5,7 @@
 #include "XD_InventoryComponentBase.h"
 #include "XD_ObjectFunctionLibrary.h"
 #include <UnrealNetwork.h>
+#include "XD_ItemSystemUtility.h"
 
 
 bool UXD_ItemCoreBase::IsSupportedForNetworking() const
@@ -75,46 +76,59 @@ AActor* UXD_ItemCoreBase::GetOwner() const
 	return OwingInventory ? OwingInventory->GetOwner() : nullptr;
 }
 
-class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/)
+class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/)
 {
 	if (OuterLevel)
 	{
 		FActorSpawnParameters ActorSpawnParameters;
+		ActorSpawnParameters.bDeferConstruction = true;
 		ActorSpawnParameters.OverrideLevel = OuterLevel;
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
 		if (AXD_ItemBase* SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AXD_ItemBase>(ItemClass, Location, Rotation, ActorSpawnParameters))
 		{
-			return SettingSpawnedItem(SpawnedItem);
+			SettingSpawnedItem(SpawnedItem, ItemNumber);
+			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
+			return SpawnedItem;
 		}
 	}
 	return nullptr;
 }
 
-class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/)
+class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/)
 {
 	if (Owner)
 	{
 		FActorSpawnParameters ActorSpawnParameters;
+		ActorSpawnParameters.bDeferConstruction = true;
 		ActorSpawnParameters.Owner = Owner;
 		ActorSpawnParameters.Instigator = Instigator;
 		ActorSpawnParameters.OverrideLevel = Owner->GetLevel();
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
 		if (AXD_ItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AXD_ItemBase>(ItemClass, Location, Rotation, ActorSpawnParameters))
 		{
-			return SettingSpawnedItem(SpawnedItem);
+			SettingSpawnedItem(SpawnedItem, ItemNumber);
+			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
+			return SpawnedItem;
 		}
 	}
 	return nullptr;
 }
 
-class AXD_ItemBase* UXD_ItemCoreBase::SettingSpawnedItem(class AXD_ItemBase* Item) const
+void UXD_ItemCoreBase::SettingSpawnedItem(class AXD_ItemBase* Item, int32 Number) const
 {
 	Item->InnerItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(this, Item);
-	if (Item->CanCompositeItem() == false)
+	if (Item->CanCompositeItem() && Number >= Item->MinItemCompositeNumber)
+	{
+		Item->InnerItemCore->Number = Number;
+	}
+	else
 	{
 		Item->InnerItemCore->Number = 1;
+		if (Number > 1)
+		{
+			ItemSystem_Warning_LOG("SpawnItemActor : 无法叠加%s，申请道具数量%d，最小叠加数量%d", *UXD_ObjectFunctionLibrary::GetClassName(ItemClass), Number, Item->MinItemCompositeNumber);
+		}
 	}
-	return Item;
 }
 
 bool UXD_ItemCoreBase::EqualForItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const
