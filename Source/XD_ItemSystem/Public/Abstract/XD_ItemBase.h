@@ -106,15 +106,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	int32 GetNumber() const;
 
-	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	bool CanCompositeItem() const { return !ItemCompositeMesh.IsNull(); }
 
+	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	bool IsCompositeItem() const { return CanCompositeItem() && GetNumber() >= MinItemCompositeNumber; }
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	UPrimitiveComponent* GetRootMeshComponent() const;
 protected:
-	class UObject* GetItemMeshAync() const;
+	class UObject* GetItemMeshSync() const;
 
 	void UpdateMaterialsOverrideSync();
 public:

@@ -111,7 +111,7 @@ void AXD_ItemBase::PreInitializeComponents()
 
 void AXD_ItemBase::InitRootMesh()
 {
-	if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(GetItemMeshAync()))
+	if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(GetItemMeshSync()))
 	{
 		if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(GetRootComponent()))
 		{
@@ -123,6 +123,12 @@ void AXD_ItemBase::InitRootMesh()
 			StaticMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			StaticMeshComponent->SetWorldTransform(GetActorTransform());
 
+			TArray<USceneComponent*> ChildrenCompnents = GetRootComponent()->GetAttachChildren();
+			for (USceneComponent* SceneComponent : ChildrenCompnents)
+			{
+				SceneComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
+			}
+
 			if (GetRootComponent())
 			{
 				GetRootComponent()->DestroyComponent();
@@ -132,7 +138,7 @@ void AXD_ItemBase::InitRootMesh()
 			StaticMeshComponent->SetStaticMesh(StaticMesh);
 		}
 	}
-	else if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(GetItemMeshAync()))
+	else if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(GetItemMeshSync()))
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(GetRootComponent()))
 		{
@@ -143,6 +149,12 @@ void AXD_ItemBase::InitRootMesh()
 			SkeletalMeshComponent = UXD_ActorFunctionLibrary::AddComponent<USkeletalMeshComponent>(this, TEXT("骨骼体模型组件"));
 			SkeletalMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			SkeletalMeshComponent->SetWorldTransform(GetActorTransform());
+
+			TArray<USceneComponent*> ChildrenCompnents = GetRootComponent()->GetAttachChildren();
+			for (USceneComponent* SceneComponent : ChildrenCompnents)
+			{
+				SceneComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
+			}
 
 			if (GetRootComponent())
 			{
@@ -235,7 +247,7 @@ UPrimitiveComponent* AXD_ItemBase::GetRootMeshComponent() const
 	return CastChecked<UPrimitiveComponent>(GetRootComponent());
 }
 
-class UObject* AXD_ItemBase::GetItemMeshAync() const
+class UObject* AXD_ItemBase::GetItemMeshSync() const
 {
 	return IsCompositeItem() ? ItemCompositeMesh.LoadSynchronous() : ItemMesh.LoadSynchronous();
 }
