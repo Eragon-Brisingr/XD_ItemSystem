@@ -103,7 +103,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 					.MinDesiredValueWidth(200.0f)
 					.IsEnabled_Lambda([=]()
 					{
-						return GetItemCore(ItemCore_PropertyHandle) ? true : false;
+						return !StructPropertyHandle->IsEditConst() && GetItemCore(ItemCore_PropertyHandle) ? true : false;
 					})
 					.Value_Lambda([=]()
 					{
