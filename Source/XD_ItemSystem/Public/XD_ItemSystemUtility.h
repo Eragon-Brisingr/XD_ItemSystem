@@ -14,7 +14,7 @@ DECLARE_LOG_CATEGORY_EXTERN(XD_ItemSystem_Log, Log, All);
 #define ItemSystem_Warning_LOG(Format, ...) UE_LOG(XD_ItemSystem_Log, Warning, TEXT(Format), ##__VA_ARGS__)
 #define ItemSystem_Error_Log(Format, ...) UE_LOG(XD_ItemSystem_Log, Error, TEXT(Format), ##__VA_ARGS__)
 
-UCLASS(Config = "XD_ItemSystemSetting")
+UCLASS(Config = "XD_ItemSystemSetting", defaultconfig)
 class XD_ITEMSYSTEM_API UXD_ItemSystemSettings : public UObject
 {
 	GENERATED_BODY()
