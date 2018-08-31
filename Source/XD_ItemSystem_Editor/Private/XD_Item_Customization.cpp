@@ -1,6 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "FXD_Item_Customization.h"
+#include "XD_Item_Customization.h"
 #include <DetailWidgetRow.h>
 #include <IDetailChildrenBuilder.h>
 #include <SNumericEntryBox.h>

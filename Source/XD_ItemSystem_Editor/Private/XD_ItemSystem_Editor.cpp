@@ -4,7 +4,7 @@
 #include <ModuleManager.h>
 #include <PropertyEditorModule.h>
 #include "XD_PropertyCustomizationEx.h"
-#include "FXD_Item_Customization.h"
+#include "XD_Item_Customization.h"
 
 #define LOCTEXT_NAMESPACE "FXD_ItemSystemModule_Editor"
 
