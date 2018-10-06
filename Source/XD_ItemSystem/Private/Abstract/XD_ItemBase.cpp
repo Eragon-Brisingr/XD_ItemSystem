@@ -279,11 +279,6 @@ UXD_ItemCoreBase* AXD_ItemBase::CreateItemCoreByType(TSubclassOf<AXD_ItemBase> I
 	return nullptr;
 }
 
-FText AXD_ItemBase::GetItemTypeDescImpl_Implementation(const class UXD_ItemCoreBase* ItemCore) const
-{
-	return LOCTEXT("AXD_ItemBase ItemTypeDesc", "继承物品");
-}
-
 class UXD_ItemCoreBase* AXD_ItemBase::GetItemCore_Careful() const
 {
 	return InnerItemCore;

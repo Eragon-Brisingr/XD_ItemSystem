@@ -79,15 +79,6 @@ public:
 	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名", EditCondition = "bNotPickBlueprintName"))
 	FText ItemName;
 
-	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "重量"))
-	float Weight;
-
-	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "价格"))
-	float Price;
-
-	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "描述"))
-	FText Describe;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
 	TSoftObjectPtr<class UObject> ItemMesh;
 	
@@ -100,8 +91,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型材质覆盖"))
 	TMap<FName, TSoftObjectPtr<UMaterialInterface>> CompositeMeshMaterialOverrideList;
 
-	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "最小叠加数目", ClampMin = "0", EditCondition = "bUseCompositeMesh"))
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "最小叠加数目", ClampMin = "2", EditCondition = "bUseCompositeMesh"))
 	int32 MinItemCompositeNumber = 5;
+
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "在背包中可以叠加"))
+	uint8 bCanCompositeInInventory : 1;
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	int32 GetNumber() const;
@@ -126,32 +120,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
 	FText GetItemName() const { return GetItemNameImpl(InnerItemCore); }
 
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	float GetWeight() const { return GetWeightImpl(InnerItemCore); }
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	float GetPrice() const { return GetPriceImpl(InnerItemCore); }
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	FText GetItemTypeDesc() const { return GetItemTypeDescImpl(InnerItemCore); }
-
 	//物品属性重写
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
 	FText GetItemNameImpl(const class UXD_ItemCoreBase* ItemCore) const;
 	virtual FText GetItemNameImpl_Implementation(const class UXD_ItemCoreBase* ItemCore) const { return ItemName; }
-
-	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
-	float GetWeightImpl(const class UXD_ItemCoreBase* ItemCore) const;
-	virtual float GetWeightImpl_Implementation(const class UXD_ItemCoreBase* ItemCore) const { return Weight; }
-
-	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
-	float GetPriceImpl(const class UXD_ItemCoreBase* ItemCore) const;
-	virtual float GetPriceImpl_Implementation(const class UXD_ItemCoreBase* ItemCore) const { return Price; }
-
-	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
-	FText GetItemTypeDescImpl(const class UXD_ItemCoreBase* ItemCore) const;
-	virtual FText GetItemTypeDescImpl_Implementation(const class UXD_ItemCoreBase* ItemCore) const;
 
 	//非特殊情况不要去修改ItemCore的值，若要修改请使用CreateItemCore
 	UFUNCTION(BlueprintPure, Category = "物品", meta = (DisplayName = "Get Item Core"))

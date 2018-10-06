@@ -31,7 +31,12 @@ public:
 
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
+	virtual void WhenGameInit_Implementation() override;
+
 	virtual void WhenLoad_Implementation() override;
+
+	UPROPERTY(EditAnywhere, Category = "背包", meta = (DisplayName = "初始道具"))
+	TArray<FXD_Item> InitItems;
 
 //新实现
 public:

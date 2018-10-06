@@ -66,11 +66,6 @@ void UXD_ItemCoreBase::OnRep_Number(int32 PreNumber)
 	}
 }
 
-class AXD_ItemBase* UXD_ItemCoreBase::GetItemDefaultActor() const
-{
-	return GetItemDefalutActorImpl<AXD_ItemBase>();
-}
-
 AActor* UXD_ItemCoreBase::GetOwner() const
 {
 	return OwingInventory ? OwingInventory->GetOwner() : nullptr;
@@ -131,6 +126,11 @@ void UXD_ItemCoreBase::SettingSpawnedItem(class AXD_ItemBase* Item, int32 Number
 	}
 }
 
+bool UXD_ItemCoreBase::CanCompositeInInventory() const
+{
+	return ItemClass.GetDefaultObject()->bCanCompositeInInventory;
+}
+
 bool UXD_ItemCoreBase::EqualForItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const
 {
 	if (this == ItemCore)
@@ -155,31 +155,6 @@ void UXD_ItemCoreBase::UseItem(class APawn* ItemOwner, EUseItemInput UseItemInpu
 FText UXD_ItemCoreBase::GetItemName() const
 {
 	return GetItemDefaultActor()->GetItemNameImpl(this);
-}
-
-float UXD_ItemCoreBase::GetWeight() const
-{
-	return GetItemDefaultActor()->GetWeightImpl(this);
-}
-
-float UXD_ItemCoreBase::GetPrice() const
-{
-	return GetItemDefaultActor()->GetPriceImpl(this);
-}
-
-FText UXD_ItemCoreBase::GetItemTypeDesc() const
-{
-	return GetItemDefaultActor()->GetItemTypeDescImpl(this);
-}
-
-float UXD_ItemCoreBase::GetTradePrice(class APawn* Role, class UXD_InventoryComponentBase* Trader, bool IsBuy) const
-{
-	return GetPrice() * 1.f;
-}
-
-FText UXD_ItemCoreBase::GetDescribe() const
-{
-	return ItemClass ? GetItemDefaultActor()->Describe : FText::GetEmpty();
 }
 
 void UXD_ItemCoreBase::BeThrowed(AActor* WhoThrowed, int32 RemoveNumber, ULevel* ThrowLevel)

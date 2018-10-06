@@ -63,6 +63,11 @@ void UXD_InventoryComponentBase::OnComponentDestroyed(bool bDestroyingHierarchy)
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
+void UXD_InventoryComponentBase::WhenGameInit_Implementation()
+{
+	AddItemArray(InitItems);
+}
+
 void UXD_InventoryComponentBase::WhenLoad_Implementation()
 {
 	OnRep_ItemList();
@@ -72,23 +77,25 @@ class UXD_ItemCoreBase* UXD_InventoryComponentBase::AddItemCore(const class UXD_
 {
 	if (!ItemCore || Number <= 0)
 		return nullptr;
-	int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](UXD_ItemCoreBase* ElementItem) {return ElementItem->EqualForItemCore(ItemCore); });
-	if (ItemIndex != INDEX_NONE)
+
+	if (ItemCore->CanCompositeInInventory())
 	{
-		int32 PreNumber = ItemCoreList[ItemIndex]->Number;
-		ItemCoreList[ItemIndex]->Number += Number;
-		ItemCoreList[ItemIndex]->OnRep_Number(PreNumber);
-		return ItemCoreList[ItemIndex];
+		int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](UXD_ItemCoreBase* ElementItem) {return ElementItem->EqualForItemCore(ItemCore); });
+		if (ItemIndex != INDEX_NONE)
+		{
+			int32 PreNumber = ItemCoreList[ItemIndex]->Number;
+			ItemCoreList[ItemIndex]->Number += Number;
+			ItemCoreList[ItemIndex]->OnRep_Number(PreNumber);
+			return ItemCoreList[ItemIndex];
+		}
 	}
-	else
-	{
-		//确保Item唯一，防止其它Item引用
-		UXD_ItemCoreBase* NewItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, this);
-		NewItemCore->Number = Number;
-		ItemCoreList.Add(NewItemCore);
-		OnRep_ItemList();
-		return NewItemCore;
-	}
+
+	//确保Item唯一，防止其它Item引用
+	UXD_ItemCoreBase* NewItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, this);
+	NewItemCore->Number = Number;
+	ItemCoreList.Add(NewItemCore);
+	OnRep_ItemList();
+	return NewItemCore;
 }
 
 int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)

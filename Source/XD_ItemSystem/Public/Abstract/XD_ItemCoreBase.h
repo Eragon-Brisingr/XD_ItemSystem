@@ -39,13 +39,10 @@ public:
 	UFUNCTION()
 	void OnRep_Number(int32 PreNumber);
 
-	UFUNCTION()
-	class AXD_ItemBase* GetItemDefaultActor() const;
-
-	template<typename ItemActorType>
-	ItemActorType* GetItemDefalutActorImpl() const
+	template<typename ItemActorType = AXD_ItemBase>
+	const ItemActorType* GetItemDefaultActor() const
 	{
-		return ItemClass->GetDefaultObject<ItemActorType>();
+		return ItemClass ? ItemClass->GetDefaultObject<ItemActorType>() : GetDefault<ItemActorType>();
 	}
 	
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
@@ -61,6 +58,9 @@ private:
 	void SettingSpawnedItem(class AXD_ItemBase* Item, int32 Number) const;
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "物品|基础")
+	bool CanCompositeInInventory() const;
+
 	//若有增加物品的属性，且该属性可变，需重载，若希望物品永不叠加，则返回false
 	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "物品|基础")
 	bool EqualForItemCore(const UXD_ItemCoreBase* ItemCore) const;
@@ -71,21 +71,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
 	FText GetItemName() const;
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	float GetWeight() const;
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	float GetPrice() const;
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	FText GetItemTypeDesc() const;
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	float GetTradePrice(class APawn* Role, class UXD_InventoryComponentBase* Trader, bool IsBuy) const;
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	FText GetDescribe() const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	void BeThrowed(AActor* WhoThrowed, int32 RemoveNumber, ULevel* ThrowLevel);
