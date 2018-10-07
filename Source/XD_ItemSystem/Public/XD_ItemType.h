@@ -10,7 +10,7 @@
  */
 
 USTRUCT(BlueprintType)
-struct FXD_Item
+struct XD_ITEMSYSTEM_API FXD_Item
 {
 	GENERATED_BODY()
 public:
@@ -50,11 +50,4 @@ public:
 	friend uint32 GetTypeHash(const FXD_Item& Item);
 
 	friend bool operator==(const FXD_Item& LHS, const FXD_Item& RHS);
-};
-
-UENUM(BlueprintType)
-enum class EUseItemInput :uint8
-{
-	LeftMouse,
-	RightMouse
 };

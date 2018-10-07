@@ -8,6 +8,12 @@
 #include "XD_ItemSystemUtility.h"
 
 
+UXD_ItemCoreBase::UXD_ItemCoreBase()
+	:ItemClass(AXD_ItemBase::StaticClass())
+{
+	
+}
+
 bool UXD_ItemCoreBase::IsSupportedForNetworking() const
 {
 	return true;
@@ -145,11 +151,6 @@ bool UXD_ItemCoreBase::EqualForItemCore_Implementation(const UXD_ItemCoreBase* I
 		}
 	}
 	return false;
-}
-
-void UXD_ItemCoreBase::UseItem(class APawn* ItemOwner, EUseItemInput UseItemInput)
-{
-	GetItemDefaultActor()->UseItemImpl(this, ItemOwner, UseItemInput);
 }
 
 FText UXD_ItemCoreBase::GetItemName() const

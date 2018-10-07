@@ -17,6 +17,8 @@ class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
 	GENERATED_BODY()
 	
 public:
+	UXD_ItemCoreBase();
+
 	virtual bool IsSupportedForNetworking() const override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const;
@@ -65,9 +67,6 @@ public:
 	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "物品|基础")
 	bool EqualForItemCore(const UXD_ItemCoreBase* ItemCore) const;
 	bool EqualForItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const;
-
-	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	void UseItem(class APawn* ItemOwner, EUseItemInput UseItemInput);
 
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
 	FText GetItemName() const;

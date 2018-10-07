@@ -20,7 +20,7 @@ class XD_ITEMSYSTEM_API AXD_ItemBase : public AActor, public IXD_SaveGameInterfa
 	
 public:	
 	// Sets default values for this actor's properties
-	AXD_ItemBase();
+	AXD_ItemBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -140,10 +140,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	bool EqualForItemCore(const class UXD_ItemCoreBase* CompareItemCore) const;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
-	void UseItemImpl(class UXD_ItemCoreBase* ItemCore, class APawn* ItemOwner, EUseItemInput UseItemInput) const;
-	virtual void UseItemImpl_Implementation(class UXD_ItemCoreBase* ItemCore, class APawn* ItemOwner, EUseItemInput UseItemInput) const{}
 
 	//默认扔出单一物品，若希望扔出一组，可重载
 	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")

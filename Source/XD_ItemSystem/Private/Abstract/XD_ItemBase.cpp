@@ -11,7 +11,8 @@
 #define LOCTEXT_NAMESPACE "物品" 
 
 // Sets default values
-AXD_ItemBase::AXD_ItemBase()
+AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	:Super(ObjectInitializer)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
