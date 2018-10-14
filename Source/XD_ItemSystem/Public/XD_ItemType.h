@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <SubclassOf.h>
 #include "XD_ItemType.generated.h"
 
 /**
