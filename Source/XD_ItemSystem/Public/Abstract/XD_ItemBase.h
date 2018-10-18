@@ -49,12 +49,17 @@ public:
 
 	void InitRootMesh();
 
-	void BeThrowedSetting();
-
 	//ISaveGameInterface
 	virtual void WhenLoad_Implementation() override;
 	//End ISaveGameInterface
 
+	//物品在世界中的处理
+public:
+	void BeThrowedSetting();
+
+	virtual void SetItemCollisionProfileName(const FName& CollisionProfileName);
+
+	virtual void SetItemSimulatePhysics(bool bSimulate);
 public:
 #if WITH_EDITORONLY_DATA
 	//取消勾选则采用蓝图名

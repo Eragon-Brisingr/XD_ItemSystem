@@ -170,21 +170,37 @@ void AXD_ItemBase::InitRootMesh()
 	BeThrowedSetting();
 }
 
+void AXD_ItemBase::WhenLoad_Implementation()
+{
+	InitRootMesh();
+}
+
 void AXD_ItemBase::BeThrowedSetting()
 {
-	if (auto Root = Cast<UPrimitiveComponent>(GetRootComponent()))
+	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(GetRootComponent()))
 	{
-		Root->SetSimulatePhysics(true);
-		Root->SetCollisionProfileName(GetDefault<UXD_ItemSystemSettings>()->ItemCollisionProfileName);
+		SetItemSimulatePhysics(true);
+		SetItemCollisionProfileName(GetDefault<UXD_ItemSystemSettings>()->ItemCollisionProfileName);
 		Root->BodyInstance.bUseCCD = true;
 		Root->SetCanEverAffectNavigation(false);
 		SetReplicateMovement(true);
 	}
 }
 
-void AXD_ItemBase::WhenLoad_Implementation()
+void AXD_ItemBase::SetItemCollisionProfileName(const FName& CollisionProfileName)
 {
-	InitRootMesh();
+	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(GetRootComponent()))
+	{
+		Root->SetCollisionProfileName(CollisionProfileName);
+	}
+}
+
+void AXD_ItemBase::SetItemSimulatePhysics(bool bSimulate)
+{
+	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(RootComponent))
+	{
+		Root->SetSimulatePhysics(bSimulate);
+	}
 }
 
 #if WITH_EDITOR
