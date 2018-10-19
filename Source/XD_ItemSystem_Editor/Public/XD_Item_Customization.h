@@ -15,6 +15,7 @@ public:
 	virtual void CustomizeHeader(TSharedRef<class IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
 	virtual void CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
 
+	TSubclassOf<class AXD_ItemBase> BaseItemClass;
 private:
 	class UXD_ItemCoreBase* GetItemCore(TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle) const;
 };

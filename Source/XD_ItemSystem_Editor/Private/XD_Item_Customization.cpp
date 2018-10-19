@@ -49,7 +49,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
  	const UClass*& MetaClass = GetObjectMemberByOffset<const UClass*>(ValueEditorWidget.Get(), 816);
  	//SPropertyEditorClass::bAllowNone
  	bool& bAllowNone = GetObjectMemberByOffset<bool>(ValueEditorWidget.Get(), 834);
- 	bAllowNone = false;
+ 	bAllowNone = true;
 
  	if (TSubclassOf<AXD_ItemBase> ShowItemType = Item.ShowItemType)
  	{
@@ -64,6 +64,10 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 			}
 		}
  	}
+	else
+	{
+		MetaClass = BaseItemClass;
+	}
 
 	if (!Item.bShowNumber)
 	{

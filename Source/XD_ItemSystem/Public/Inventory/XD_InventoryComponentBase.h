@@ -72,7 +72,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	int32 RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	void AddItemArray(const TArray<FXD_Item>& Items);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
