@@ -103,19 +103,22 @@ int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* I
 	int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](auto& ElementItem) {return ElementItem->EqualForItemCore(ItemCore); });
 	if (ItemIndex != INDEX_NONE)
 	{
-		if (ItemCoreList[ItemIndex]->Number - Number <= 0)
+		if (UXD_ItemCoreBase* ItemCore = ItemCoreList[ItemIndex])
 		{
-			int32 RetNum = ItemCoreList[ItemIndex]->Number;
-			ItemCoreList.RemoveAt(ItemIndex);
-			OnRep_ItemList();
-			return RetNum;
-		}
-		else
-		{
-			int32 PreNumber = ItemCoreList[ItemIndex]->Number;
-			ItemCoreList[ItemIndex]->Number -= Number;
-			ItemCoreList[ItemIndex]->OnRep_Number(PreNumber);
-			return Number;
+			if (ItemCore->Number - Number <= 0)
+			{
+				int32 RetNum = ItemCore->Number;
+				ItemCoreList.RemoveAt(ItemIndex);
+				OnRep_ItemList();
+				return RetNum;
+			}
+			else
+			{
+				int32 PreNumber = ItemCore->Number;
+				ItemCore->Number -= Number;
+				ItemCore->OnRep_Number(PreNumber);
+				return Number;
+			}
 		}
 	}
 	return 0;
@@ -252,15 +255,12 @@ void UXD_InventoryComponentBase::OnRep_ItemList()
 		}
 	}
 
-	if (OnRemoveItem.IsBound())
+	for (UXD_ItemCoreBase* RemoveItem : TSet<UXD_ItemCoreBase*>(PreItemCoreList).Difference(TSet<UXD_ItemCoreBase*>(ItemCoreList)))
 	{
-		for (UXD_ItemCoreBase* RemoveItem : TSet<UXD_ItemCoreBase*>(PreItemCoreList).Difference(TSet<UXD_ItemCoreBase*>(ItemCoreList)))
+		if (RemoveItem)
 		{
-			if (RemoveItem)
-			{
-				OnRemoveItem.Broadcast(RemoveItem, RemoveItem->Number, 0);
-				RemoveItem->WhenRemoveFromInventory(GetOwner(), RemoveItem->Number, 0);
-			}
+			OnRemoveItem.Broadcast(RemoveItem, RemoveItem->Number, 0);
+			RemoveItem->WhenRemoveFromInventory(GetOwner(), RemoveItem->Number, 0);
 		}
 	}
 
