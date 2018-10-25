@@ -83,10 +83,13 @@ class UXD_ItemCoreBase* UXD_InventoryComponentBase::AddItemCore(const class UXD_
 		int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](UXD_ItemCoreBase* ElementItem) {return ElementItem->EqualForItemCore(ItemCore); });
 		if (ItemIndex != INDEX_NONE)
 		{
-			int32 PreNumber = ItemCoreList[ItemIndex]->Number;
-			ItemCoreList[ItemIndex]->Number += Number;
-			ItemCoreList[ItemIndex]->OnRep_Number(PreNumber);
-			return ItemCoreList[ItemIndex];
+			if (UXD_ItemCoreBase* NeedAddItemCore = ItemCoreList[ItemIndex])
+			{
+				int32 PreNumber = NeedAddItemCore->Number;
+				NeedAddItemCore->Number += Number;
+				NeedAddItemCore->OnRep_Number(PreNumber);
+				return NeedAddItemCore;
+			}
 		}
 	}
 
@@ -103,20 +106,20 @@ int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* I
 	int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](auto& ElementItem) {return ElementItem->EqualForItemCore(ItemCore); });
 	if (ItemIndex != INDEX_NONE)
 	{
-		if (UXD_ItemCoreBase* ItemCore = ItemCoreList[ItemIndex])
+		if (UXD_ItemCoreBase* NeedRemoveItemCore = ItemCoreList[ItemIndex])
 		{
-			if (ItemCore->Number - Number <= 0)
+			if (NeedRemoveItemCore->Number - Number <= 0)
 			{
-				int32 RetNum = ItemCore->Number;
+				int32 RetNum = NeedRemoveItemCore->Number;
 				ItemCoreList.RemoveAt(ItemIndex);
 				OnRep_ItemList();
 				return RetNum;
 			}
 			else
 			{
-				int32 PreNumber = ItemCore->Number;
-				ItemCore->Number -= Number;
-				ItemCore->OnRep_Number(PreNumber);
+				int32 PreNumber = NeedRemoveItemCore->Number;
+				NeedRemoveItemCore->Number -= Number;
+				NeedRemoveItemCore->OnRep_Number(PreNumber);
 				return Number;
 			}
 		}
