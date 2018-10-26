@@ -37,7 +37,6 @@ public:
 	//初始化模型
 public:
 #if WITH_EDITORONLY_DATA
-	bool bMeshInit;
 
 	UPROPERTY()
 	UStaticMeshComponent* BlueprintPreviewHelper;

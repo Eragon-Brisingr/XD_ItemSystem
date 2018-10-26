@@ -88,26 +88,18 @@ void AXD_ItemBase::PostInitProperties()
 		BlueprintPreviewHelper->DestroyComponent();
 	}
 #endif
+	InitRootMesh();
 }
 
 void AXD_ItemBase::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
-#if WITH_EDITOR
-	if (bMeshInit == false)
-	{
-		InitRootMesh();
-		bMeshInit = true;
-	}
-#endif
 }
 
 void AXD_ItemBase::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
-	InitRootMesh();
 }
 
 void AXD_ItemBase::InitRootMesh()
@@ -124,15 +116,14 @@ void AXD_ItemBase::InitRootMesh()
 			StaticMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			StaticMeshComponent->SetWorldTransform(GetActorTransform());
 
-			TArray<USceneComponent*> ChildrenCompnents = GetRootComponent()->GetAttachChildren();
-			for (USceneComponent* SceneComponent : ChildrenCompnents)
+			if (USceneComponent* RootComponent = GetRootComponent())
 			{
-				SceneComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
-			}
-
-			if (GetRootComponent())
-			{
-				GetRootComponent()->DestroyComponent();
+				TArray<USceneComponent*> ChildrenCompnents = RootComponent->GetAttachChildren();
+				for (USceneComponent* SceneComponent : ChildrenCompnents)
+				{
+					SceneComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
+				}
+				RootComponent->DestroyComponent();
 			}
 			SetRootComponent(StaticMeshComponent);
 
@@ -150,17 +141,16 @@ void AXD_ItemBase::InitRootMesh()
 			SkeletalMeshComponent = UXD_ActorFunctionLibrary::AddComponent<USkeletalMeshComponent>(this, TEXT("骨骼体模型组件"));
 			SkeletalMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			SkeletalMeshComponent->SetWorldTransform(GetActorTransform());
-
-			TArray<USceneComponent*> ChildrenCompnents = GetRootComponent()->GetAttachChildren();
-			for (USceneComponent* SceneComponent : ChildrenCompnents)
+			if (USceneComponent* RootComponent = GetRootComponent())
 			{
-				SceneComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
+				TArray<USceneComponent*> ChildrenCompnents = RootComponent->GetAttachChildren();
+				for (USceneComponent* SceneComponent : ChildrenCompnents)
+				{
+					SceneComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
+				}
+				RootComponent->DestroyComponent();
 			}
 
-			if (GetRootComponent())
-			{
-				GetRootComponent()->DestroyComponent();
-			}
 			SetRootComponent(SkeletalMeshComponent);
 
 			SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
