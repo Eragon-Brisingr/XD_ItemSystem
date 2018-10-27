@@ -41,20 +41,15 @@ public:
 	UPROPERTY()
 	UStaticMeshComponent* BlueprintPreviewHelper;
 #endif
-
-	virtual void OnConstruction(const FTransform& Transform) override;
-
-	virtual void PreInitializeComponents() override;
-
-	void InitRootMesh();
-
 	//ISaveGameInterface
 	virtual void WhenLoad_Implementation() override;
 	//End ISaveGameInterface
 
-	//物品在世界中的处理
 public:
-	void BeThrowedSetting();
+	void InitRootMesh();
+
+	//物品在世界中的处理
+	virtual void WhenItemInWorldSetting();
 
 	virtual void SetItemCollisionProfileName(const FName& CollisionProfileName);
 
@@ -75,10 +70,7 @@ public:
 	class UXD_ItemCoreBase* InnerItemCore;
 
 	UFUNCTION()
-	void OnRep_InnerItemCore();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "物品")
-	void WhenInnerItemCoreInited();
+	virtual void OnRep_InnerItemCore();
 
 	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名", EditCondition = "bNotPickBlueprintName"))
 	FText ItemName;

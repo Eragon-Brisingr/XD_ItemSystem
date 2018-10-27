@@ -91,24 +91,22 @@ void AXD_ItemBase::PostInitProperties()
 	InitRootMesh();
 }
 
-void AXD_ItemBase::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-}
-
-void AXD_ItemBase::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-
-}
-
 void AXD_ItemBase::InitRootMesh()
 {
+	bool NeedReinit = true;
+
 	if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(GetItemMeshSync()))
 	{
 		if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(GetRootComponent()))
 		{
-			StaticMeshComponent->SetStaticMesh(StaticMesh);
+			if (StaticMeshComponent->GetStaticMesh() != StaticMesh)
+			{
+				StaticMeshComponent->SetStaticMesh(StaticMesh);
+			}
+			else
+			{
+				NeedReinit = false;
+			}
 		}
 		else
 		{
@@ -134,7 +132,14 @@ void AXD_ItemBase::InitRootMesh()
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(GetRootComponent()))
 		{
-			SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+			if (SkeletalMeshComponent->SkeletalMesh != SkeletalMesh)
+			{
+				SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+			}
+			else
+			{
+				NeedReinit = false;
+			}
 		}
 		else
 		{
@@ -157,7 +162,10 @@ void AXD_ItemBase::InitRootMesh()
 		}
 	}
 
-	BeThrowedSetting();
+	if (NeedReinit)
+	{
+		WhenItemInWorldSetting();
+	}
 }
 
 void AXD_ItemBase::WhenLoad_Implementation()
@@ -165,11 +173,14 @@ void AXD_ItemBase::WhenLoad_Implementation()
 	InitRootMesh();
 }
 
-void AXD_ItemBase::BeThrowedSetting()
+void AXD_ItemBase::WhenItemInWorldSetting()
 {
 	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(GetRootComponent()))
 	{
-		SetItemSimulatePhysics(true);
+		if (GetAttachParentActor() == nullptr)
+		{
+			SetItemSimulatePhysics(true);
+		}
 		SetItemCollisionProfileName(GetDefault<UXD_ItemSystemSettings>()->ItemCollisionProfileName);
 		Root->BodyInstance.bUseCCD = true;
 		Root->SetCanEverAffectNavigation(false);
@@ -235,12 +246,8 @@ void AXD_ItemBase::OnRep_InnerItemCore()
 {
 	if (InnerItemCore)
 	{
-		if (InnerItemCore->Number >= MinItemCompositeNumber)
-		{
-			//假设ItemCore的Number网络初始化在InnerItemCore前
-			InitRootMesh();
-		}
-		WhenInnerItemCoreInited();
+		//假设ItemCore的Number网络初始化在InnerItemCore前
+		InitRootMesh();
 	}
 }
 
@@ -333,7 +340,7 @@ void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCore
 			for (int i = 0; i < ThrowNumber; ++i)
 			{
 				AXD_ItemBase* SpawnedItem = ItemCore->SpawnItemActorInLevel(ThrowToLevel, 1, ThrowLocation, ThrowRotation);
-				SpawnedItem->BeThrowedSetting();
+				SpawnedItem->WhenItemInWorldSetting();
 			}
 		}
 	}
