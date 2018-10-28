@@ -4,6 +4,8 @@
 #include "XD_ItemCoreBase.h"
 #include "XD_ObjectFunctionLibrary.h"
 #include <Kismet/KismetSystemLibrary.h>
+#include "XD_ItemBase.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values for this component's properties
@@ -24,7 +26,9 @@ void UXD_InventoryComponentBase::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+#if WITH_EDITOR
+	InitItemsType = AXD_ItemBase::StaticClass();
+#endif
 }
 
 
@@ -72,6 +76,22 @@ void UXD_InventoryComponentBase::WhenLoad_Implementation()
 {
 	OnRep_ItemList();
 }
+
+#if WITH_EDITOR
+void UXD_InventoryComponentBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+	if (InitItemsType && PropertyName == GET_MEMBER_NAME_CHECKED(UXD_InventoryComponentBase, InitItems))
+	{
+		for (FXD_Item& Item : InitItems)
+		{
+			Item.ShowItemType = InitItemsType;
+		}
+	}
+}
+#endif
 
 class UXD_ItemCoreBase* UXD_InventoryComponentBase::AddItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {

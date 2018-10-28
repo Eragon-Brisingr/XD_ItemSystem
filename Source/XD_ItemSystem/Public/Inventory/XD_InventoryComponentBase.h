@@ -21,7 +21,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -34,6 +34,12 @@ public:
 	virtual void WhenGameInit_Implementation() override;
 
 	virtual void WhenLoad_Implementation() override;
+
+#if WITH_EDITOR
+	TSubclassOf<class AXD_ItemBase> InitItemsType;
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 	UPROPERTY(EditAnywhere, Category = "背包", meta = (DisplayName = "初始道具"))
 	TArray<FXD_Item> InitItems;
