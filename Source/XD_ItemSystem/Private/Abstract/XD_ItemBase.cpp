@@ -88,10 +88,18 @@ void AXD_ItemBase::PostInitProperties()
 		BlueprintPreviewHelper->DestroyComponent();
 	}
 #endif
-	InitRootMesh();
+	InitRootMesh(false);
 }
 
-void AXD_ItemBase::InitRootMesh()
+void AXD_ItemBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	//在PostInitProperties后才执行WhenItemInWorldSetting，防止[Attempting to move a fully simulated skeletal mesh]的警告
+	WhenItemInWorldSetting();
+}
+
+void AXD_ItemBase::InitRootMesh(bool ExecuteSpawnInWorldInit)
 {
 	bool NeedReinit = true;
 
@@ -162,7 +170,7 @@ void AXD_ItemBase::InitRootMesh()
 		}
 	}
 
-	if (NeedReinit)
+	if (NeedReinit && ExecuteSpawnInWorldInit)
 	{
 		WhenItemInWorldSetting();
 	}

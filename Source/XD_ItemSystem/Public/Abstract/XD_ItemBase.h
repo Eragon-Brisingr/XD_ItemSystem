@@ -34,6 +34,8 @@ public:
 	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
 	virtual void PostInitProperties() override;
+
+	virtual void PostInitializeComponents() override;
 	//初始化模型
 public:
 #if WITH_EDITORONLY_DATA
@@ -46,7 +48,7 @@ public:
 	//End ISaveGameInterface
 
 public:
-	void InitRootMesh();
+	void InitRootMesh(bool ExecuteSpawnInWorldInit = true);
 
 	//物品在世界中的处理
 	virtual void WhenItemInWorldSetting();
