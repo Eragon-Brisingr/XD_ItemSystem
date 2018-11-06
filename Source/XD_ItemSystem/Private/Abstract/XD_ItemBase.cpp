@@ -88,6 +88,10 @@ void AXD_ItemBase::PostInitProperties()
 		BlueprintPreviewHelper->DestroyComponent();
 	}
 #endif
+	if (InnerItemCore)
+	{
+		InnerItemCore->ItemClass = GetClass();
+	}
 	InitRootMesh(false);
 }
 
