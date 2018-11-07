@@ -24,10 +24,6 @@ AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObje
 
 	InnerItemCore = CreateDefaultSubobject<UXD_ItemCoreBase>(GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore));
 
-	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("物品根代理组件"), true);
-
-	SetRootComponent(SceneComponent);
-
 #if WITH_EDITOR
 	BlueprintPreviewHelper = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("蓝图预览图用"), true);
 	{
@@ -35,7 +31,6 @@ AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObje
 		BlueprintPreviewHelper->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		BlueprintPreviewHelper->SetWorldScale3D(FVector(0.0001f, 0.0001f, 0.0001f));
 		BlueprintPreviewHelper->bIsEditorOnly = true;
-		BlueprintPreviewHelper->SetupAttachment(SceneComponent);
 	}
 #endif
 }
@@ -99,6 +94,15 @@ void AXD_ItemBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	//删除读取的物品携带的默认根骨骼
+	for (UActorComponent* ActorComponent : GetComponents())
+	{
+		if (ActorComponent->GetFName() == USceneComponent::GetDefaultSceneRootVariableName())
+		{
+			ActorComponent->DestroyComponent();
+			break;
+		}
+	}
 	//在PostInitProperties后才执行WhenItemInWorldSetting，防止[Attempting to move a fully simulated skeletal mesh]的警告
 	WhenItemInWorldSetting();
 }
