@@ -44,7 +44,7 @@ public:
 	UStaticMeshComponent* BlueprintPreviewHelper;
 #endif
 	//ISaveGameInterface
-	virtual void WhenLoad_Implementation() override;
+	virtual void WhenPostLoad_Implementation() override;
 	//End ISaveGameInterface
 
 public:

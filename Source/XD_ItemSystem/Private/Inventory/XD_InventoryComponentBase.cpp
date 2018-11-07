@@ -72,7 +72,7 @@ void UXD_InventoryComponentBase::WhenGameInit_Implementation()
 	AddItemArray(InitItems);
 }
 
-void UXD_InventoryComponentBase::WhenLoad_Implementation()
+void UXD_InventoryComponentBase::WhenPostLoad_Implementation()
 {
 	OnRep_ItemList();
 }

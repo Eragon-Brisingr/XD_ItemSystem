@@ -184,7 +184,7 @@ void AXD_ItemBase::InitRootMesh(bool ExecuteSpawnInWorldInit)
 	}
 }
 
-void AXD_ItemBase::WhenLoad_Implementation()
+void AXD_ItemBase::WhenPostLoad_Implementation()
 {
 	InitRootMesh();
 }

@@ -33,7 +33,7 @@ public:
 
 	virtual void WhenGameInit_Implementation() override;
 
-	virtual void WhenLoad_Implementation() override;
+	virtual void WhenPostLoad_Implementation() override;
 
 #if WITH_EDITOR
 	TSubclassOf<class AXD_ItemBase> InitItemsType;
