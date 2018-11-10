@@ -39,17 +39,14 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 
  	TSharedRef<SWidget> PropertyValueWidget = ItemClass_PropertyHandle->CreatePropertyValueWidget(false);
 
-// #include <Private/PropertyEditorHelpers.h>
-// #include <Private/UserInterface/PropertyEditor/SPropertyEditorClass.h>
-// #define offsetof(type, member) (size_t)&(((type*)0)->member)
-// 	constexpr long offset = offsetof(SPropertyEditorClass, bAllowNone);
+ //#include <Private/PropertyEditorHelpers.h>
+ //#include <Private/UserInterface/PropertyEditor/SPropertyEditorClass.h>
+ //#define offsetof(type, member) (size_t)&(((type*)0)->member)
+ //	constexpr long offset = offsetof(SPropertyValueWidget, ValueEditorWidget);
  	//SPropertyValueWidget::ValueEditorWidget
- 	TSharedPtr<SWidget>& ValueEditorWidget = GetObjectMemberByOffset<TSharedPtr<SWidget>>(&PropertyValueWidget.Get(), 784);
+ 	TSharedPtr<SWidget>& ValueEditorWidget = GetObjectMemberByOffset<TSharedPtr<SWidget>>(&PropertyValueWidget.Get(), 768L);
  	//SPropertyEditorClass::MetaClass
- 	const UClass*& MetaClass = GetObjectMemberByOffset<const UClass*>(ValueEditorWidget.Get(), 816);
- 	//SPropertyEditorClass::bAllowNone
- 	bool& bAllowNone = GetObjectMemberByOffset<bool>(ValueEditorWidget.Get(), 834);
- 	bAllowNone = true;
+ 	const UClass*& MetaClass = GetObjectMemberByOffset<const UClass*>(ValueEditorWidget.Get(), 800L);
 
  	if (TSubclassOf<AXD_ItemBase> ShowItemType = Item.ShowItemType)
  	{
