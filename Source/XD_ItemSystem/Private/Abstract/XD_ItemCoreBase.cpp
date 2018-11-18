@@ -137,7 +137,7 @@ bool UXD_ItemCoreBase::CanCompositeInInventory() const
 	return ItemClass.GetDefaultObject()->bCanCompositeInInventory;
 }
 
-bool UXD_ItemCoreBase::EqualForItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const
+bool UXD_ItemCoreBase::IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const
 {
 	if (this == ItemCore)
 	{
@@ -145,10 +145,9 @@ bool UXD_ItemCoreBase::EqualForItemCore_Implementation(const UXD_ItemCoreBase* I
 	}
 	if (this && ItemCore)
 	{
-		if (GetClass() == ItemCore->GetClass())
-		{
-			return ItemClass == ItemCore->ItemClass;
-		}
+		return GetClass() == ItemCore->GetClass() 
+				&& ItemClass == ItemCore->ItemClass 
+				&& RecevieIsEqualWithItemCore(ItemCore);
 	}
 	return false;
 }

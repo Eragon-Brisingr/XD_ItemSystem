@@ -29,11 +29,10 @@ public:
 
 	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-
+	//IXD_SaveGameInterface
 	virtual void WhenGameInit_Implementation() override;
-
 	virtual void WhenPostLoad_Implementation() override;
+	//IXD_SaveGameInterface
 
 #if WITH_EDITOR
 	TSubclassOf<class AXD_ItemBase> InitItemsType;
@@ -44,7 +43,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "背包", meta = (DisplayName = "初始道具"))
 	TArray<FXD_Item> InitItems;
 
-//新实现
+//回调事件
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAddItem, class UXD_ItemCoreBase*, ItemCore, int32, AddNumber, int32, ExistNumber);
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
@@ -69,10 +68,9 @@ public:
 
 	UFUNCTION()
 	void OnRep_ItemList();
-
 public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
-	class UXD_ItemCoreBase* AddItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
+	TArray<class UXD_ItemCoreBase*> AddItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
 	//返回值是移除的道具数目
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
@@ -81,7 +79,11 @@ public:
 	void AddItemArray(const TArray<FXD_Item>& Items);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
-	class UXD_ItemCoreBase* AddItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number = 1);
+	TArray<class UXD_ItemCoreBase*> AddItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number = 1);
+
+	//返回值是移除的道具数目
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
+	int32 RemoveItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number = 1);
 
 	//考虑网络的Owner
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
@@ -89,10 +91,8 @@ public:
 
 	ULevel* GetThrowedLevel();
 
-	UFUNCTION(BlueprintCallable, Category = "背包", Reliable, WithValidation, Server)
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	void ThrowItemCore(class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
-	virtual void ThrowItemCore_Implementation(class UXD_ItemCoreBase* ItemCore, int32 Number = 1);
-	bool ThrowItemCore_Validate(class UXD_ItemCoreBase* ItemCore, int32 Number) { return true; }
 
 	UFUNCTION(BlueprintPure, Category = "背包")
 	int32 GetItemNumber(class AXD_ItemBase* Item);
@@ -101,7 +101,7 @@ public:
 	int32 GetItemNumberByCore(const class UXD_ItemCoreBase* ItemCore);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
-	int32 GetItemNumberByClass(TSubclassOf<class AXD_ItemBase> ItemClass);
+	int32 GetItemNumberByType(TSubclassOf<class AXD_ItemBase> ItemClass);
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	void ClearItem();

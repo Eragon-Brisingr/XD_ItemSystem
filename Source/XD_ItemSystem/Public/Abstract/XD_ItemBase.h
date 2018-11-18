@@ -134,10 +134,10 @@ public:
 	class UXD_ItemCoreBase* CreateItemCore(UObject* Outer) const;
 
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	bool EqualForItem(const AXD_ItemBase* Item) const;
+	bool IsEqualWithItem(const AXD_ItemBase* Item) const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
-	bool EqualForItemCore(const class UXD_ItemCoreBase* CompareItemCore) const;
+	bool IsEqualWithItemCore(const class UXD_ItemCoreBase* CompareItemCore) const;
 
 	//默认扔出单一物品，若希望扔出一组，可重载
 	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")

@@ -12,15 +12,15 @@
 
 // Sets default values
 AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
-	:Super(ObjectInitializer)
+	:Super(ObjectInitializer),
+	ItemName(LOCTEXT("物品", "物品")),
+	bCanCompositeInInventory(true)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	bReplicates = true;
-
-	ItemName = LOCTEXT("物品", "物品");
 
 	InnerItemCore = CreateDefaultSubobject<UXD_ItemCoreBase>(GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore));
 
@@ -324,14 +324,14 @@ class UXD_ItemCoreBase* AXD_ItemBase::CreateItemCore(UObject* Outer) const
 	return UXD_ObjectFunctionLibrary::DuplicateObject(InnerItemCore, Outer);
 }
 
-bool AXD_ItemBase::EqualForItem(const AXD_ItemBase* Item) const
+bool AXD_ItemBase::IsEqualWithItem(const AXD_ItemBase* Item) const
 {
-	return this && Item && GetItemCore()->EqualForItemCore(Item->GetItemCore());
+	return this && Item && GetItemCore()->IsEqualWithItemCore(Item->GetItemCore());
 }
 
-bool AXD_ItemBase::EqualForItemCore(const class UXD_ItemCoreBase* CompareItemCore) const
+bool AXD_ItemBase::IsEqualWithItemCore(const class UXD_ItemCoreBase* CompareItemCore) const
 {
-	return this && InnerItemCore && InnerItemCore->EqualForItemCore(CompareItemCore);
+	return this && InnerItemCore && InnerItemCore->IsEqualWithItemCore(CompareItemCore);
 }
 
 void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const

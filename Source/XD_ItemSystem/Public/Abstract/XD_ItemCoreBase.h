@@ -64,10 +64,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	bool CanCompositeInInventory() const;
 
-	//若有增加物品的属性，且该属性可变，需重载，若希望物品永不叠加，则返回false
-	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "物品|基础")
-	bool EqualForItemCore(const UXD_ItemCoreBase* ItemCore) const;
-	bool EqualForItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const;
+	//若有增加物品的属性，且该属性可变，需重载
+	UFUNCTION(BlueprintPure, Category = "物品|基础")
+	virtual bool IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const;
+	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础", meta = (DisplayName = "IsEqualWithItemCore"))
+	bool RecevieIsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const;
+	bool RecevieIsEqualWithItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const { return true; }
 
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
 	FText GetItemName() const;

@@ -15,19 +15,7 @@ struct XD_ITEMSYSTEM_API FXD_Item
 {
 	GENERATED_BODY()
 public:
-	FXD_Item()
-	{
-#if WITH_EDITORONLY_DATA
-		bShowNumber = true;
-#endif
-	}
-	FXD_Item(class UXD_ItemCoreBase* ItemCore) 
-		:ItemCore(ItemCore)
-	{
-#if WITH_EDITORONLY_DATA
-		bShowNumber = true;
-#endif
-	}
+	FXD_Item(class UXD_ItemCoreBase* ItemCore = nullptr);
 
 	explicit operator bool() const { return ItemCore ? true : false; }
 
