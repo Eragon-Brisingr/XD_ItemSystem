@@ -126,73 +126,16 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const cl
 	return Res;
 }
 
-int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+template<typename TPredicate>
+int32 RemoveItemByPredicate(UXD_InventoryComponentBase* Inventory, int32 &Number, const TPredicate& Predicate)
 {
-	if (ItemCore && ItemCore->CanCompositeInInventory())
-	{
-		int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](UXD_ItemCoreBase* ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
-		if (ItemIndex != INDEX_NONE)
-		{
-			if (UXD_ItemCoreBase* NeedRemoveItemCore = ItemCoreList[ItemIndex])
-			{
-				if (NeedRemoveItemCore->Number - Number <= 0)
-				{
-					int32 RetNum = NeedRemoveItemCore->Number;
-					ItemCoreList.RemoveAt(ItemIndex);
-					OnRep_ItemList();
-					return RetNum;
-				}
-				else
-				{
-					int32 PreNumber = NeedRemoveItemCore->Number;
-					NeedRemoveItemCore->Number -= Number;
-					NeedRemoveItemCore->OnRep_Number(PreNumber);
-					return Number;
-				}
-			}
-		}
-	}
-	else
-	{
-		int RemovedNumber = 0;
-		for (int i = 0; i < ItemCoreList.Num();)
-		{
-			if (ItemCoreList[i]->IsEqualWithItemCore(ItemCore))
-			{
-				RemovedNumber += 1;
-				ItemCoreList.RemoveAt(i);
-			}
-			else
-			{
-				++i;
-			}
-		}
-		if (RemovedNumber > 0)
-		{
-			OnRep_ItemList();
-		}
-		return RemovedNumber;
-	}
-	return 0;
-}
-
-TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number /*= 1*/)
-{
-	if (Item)
-	{
-		return AddItemCore(Item.GetDefaultObject()->GetItemCore(), Number);
-	}
-	return {};
-}
-
-int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number)
-{
+	TArray<class UXD_ItemCoreBase *> &ItemCoreList = Inventory->ItemCoreList;
 	int32 RemovedNumber = 0;
 	for (int i = 0; i < ItemCoreList.Num(); ++i)
 	{
 		if (UXD_ItemCoreBase* ItemCore = ItemCoreList[i])
 		{
-			if (ItemCore->ItemClass == Item)
+			if (Predicate(ItemCore))
 			{
 				if (ItemCore->Number - Number <= 0)
 				{
@@ -211,8 +154,27 @@ int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<class AXD_Ite
 			}
 		}
 	}
-	OnRep_ItemList();
+	Inventory->OnRep_ItemList();
 	return RemovedNumber;
+}
+
+int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+{
+	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
+}
+
+TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number /*= 1*/)
+{
+	if (Item)
+	{
+		return AddItemCore(Item.GetDefaultObject()->GetItemCore(), Number);
+	}
+	return {};
+}
+
+int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number)
+{
+	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ItemCore) {return ItemCore->ItemClass == Item; });
 }
 
 void UXD_InventoryComponentBase::GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
