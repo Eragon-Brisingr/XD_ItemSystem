@@ -40,7 +40,7 @@ public:
 public:
 #if WITH_EDITORONLY_DATA
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UStaticMeshComponent* BlueprintPreviewHelper;
 #endif
 	//ISaveGameInterface

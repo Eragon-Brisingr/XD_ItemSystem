@@ -25,7 +25,7 @@ AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObje
 	InnerItemCore = CreateDefaultSubobject<UXD_ItemCoreBase>(GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore));
 
 #if WITH_EDITOR
-	BlueprintPreviewHelper = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("蓝图预览图用"), true);
+	BlueprintPreviewHelper = CreateEditorOnlyDefaultSubobject<UStaticMeshComponent>(TEXT("蓝图预览图用"), true);
 	{
 		BlueprintPreviewHelper->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'")).Object);
 		BlueprintPreviewHelper->SetCollisionEnabled(ECollisionEnabled::NoCollision);
