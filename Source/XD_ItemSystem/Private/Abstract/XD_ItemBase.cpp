@@ -26,11 +26,12 @@ AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObje
 
 #if WITH_EDITOR
 	BlueprintPreviewHelper = CreateEditorOnlyDefaultSubobject<UStaticMeshComponent>(TEXT("蓝图预览图用"), true);
+	if (BlueprintPreviewHelper)
 	{
+		BlueprintPreviewHelper->bIsEditorOnly = true;
 		BlueprintPreviewHelper->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Engine/BasicShapes/Cube.Cube'")).Object);
 		BlueprintPreviewHelper->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		BlueprintPreviewHelper->SetWorldScale3D(FVector(0.0001f, 0.0001f, 0.0001f));
-		BlueprintPreviewHelper->bIsEditorOnly = true;
 	}
 #endif
 }
