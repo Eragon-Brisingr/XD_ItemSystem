@@ -33,7 +33,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayName = "道具类型"))
 	TSubclassOf<class AXD_ItemBase> ItemClass;
 #endif
-	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category = "Item", meta = (DisplayName = "道具详情"))
+	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category = "Item", meta = (DisplayName = "道具详情"), SaveGame)
 	class UXD_ItemCoreBase* ItemCore;
 
 	friend uint32 GetTypeHash(const FXD_Item& Item);
