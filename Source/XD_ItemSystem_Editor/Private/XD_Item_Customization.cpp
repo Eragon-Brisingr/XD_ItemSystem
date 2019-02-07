@@ -28,6 +28,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 			TSubclassOf<AXD_ItemBase> ItemClass = CastChecked<UClass>(ClassObject);
 			UXD_ItemCoreBase* ItemCore = AXD_ItemBase::CreateItemCoreByType(ItemClass, Outer);
 			ItemCore->ItemClass = ItemClass;
+			ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
 			FPropertyCustomizeHelper::SetObjectValue(ItemCore_PropertyHandle, ItemCore);
 		}
 		else
@@ -55,10 +56,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 		{
 			Item.ItemClass = Item.ShowItemType;
 			Item.ItemCore = AXD_ItemBase::CreateItemCoreByType(ShowItemType, FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef()));
-			if (Item.ItemCore->HasAnyFlags(RF_ClassDefaultObject | RF_ArchetypeObject))
-			{
-				Item.ItemCore->SetFlags(RF_ArchetypeObject);
-			}
+			Item.ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
 		}
  	}
 	else
