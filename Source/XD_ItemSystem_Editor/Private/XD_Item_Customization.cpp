@@ -44,14 +44,14 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
  //#include <Private/UserInterface/PropertyEditor/SPropertyEditorClass.h>
  //#define offsetof(type, member) (size_t)&(((type*)0)->member)
  //	constexpr long offset = offsetof(SPropertyValueWidget, ValueEditorWidget);
- 	//SPropertyValueWidget::ValueEditorWidget
- 	TSharedPtr<SWidget>& ValueEditorWidget = GetObjectMemberByOffset<TSharedPtr<SWidget>>(&PropertyValueWidget.Get(), 768L);
- 	//SPropertyEditorClass::MetaClass
- 	const UClass*& MetaClass = GetObjectMemberByOffset<const UClass*>(ValueEditorWidget.Get(), 800L);
+//  	//SPropertyValueWidget::ValueEditorWidget
+//  	TSharedPtr<SWidget>& ValueEditorWidget = GetObjectMemberByOffset<TSharedPtr<SWidget>>(&PropertyValueWidget.Get(), 768L);
+//  	//SPropertyEditorClass::MetaClass
+//  	const UClass*& MetaClass = GetObjectMemberByOffset<const UClass*>(ValueEditorWidget.Get(), 800L);
 
  	if (TSubclassOf<AXD_ItemBase> ShowItemType = Item.ShowItemType)
  	{
- 		MetaClass = ShowItemType;
+ 		//MetaClass = ShowItemType;
 		if (Item.ItemCore && !Item.ItemCore->ItemClass->IsChildOf(Item.ShowItemType))
 		{
 			Item.ItemClass = Item.ShowItemType;
@@ -61,7 +61,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
  	}
 	else
 	{
-		MetaClass = BaseItemClass;
+		//MetaClass = BaseItemClass;
 	}
 
 	if (!Item.bShowNumber)

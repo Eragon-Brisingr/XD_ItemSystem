@@ -131,14 +131,14 @@ void AXD_ItemBase::InitRootMesh(bool ExecuteSpawnInWorldInit)
 			StaticMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			StaticMeshComponent->SetWorldTransform(GetActorTransform());
 
-			if (USceneComponent* RootComponent = GetRootComponent())
+			if (USceneComponent* TheRootComponent = GetRootComponent())
 			{
-				TArray<USceneComponent*> ChildrenCompnents = RootComponent->GetAttachChildren();
+				TArray<USceneComponent*> ChildrenCompnents = TheRootComponent->GetAttachChildren();
 				for (USceneComponent* SceneComponent : ChildrenCompnents)
 				{
 					SceneComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
 				}
-				RootComponent->DestroyComponent();
+				TheRootComponent->DestroyComponent();
 			}
 			SetRootComponent(StaticMeshComponent);
 
@@ -163,14 +163,14 @@ void AXD_ItemBase::InitRootMesh(bool ExecuteSpawnInWorldInit)
 			SkeletalMeshComponent = UXD_ActorFunctionLibrary::AddComponent<USkeletalMeshComponent>(this, TEXT("骨骼体模型组件"));
 			SkeletalMeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 			SkeletalMeshComponent->SetWorldTransform(GetActorTransform());
-			if (USceneComponent* RootComponent = GetRootComponent())
+			if (USceneComponent* TheRootComponent = GetRootComponent())
 			{
-				TArray<USceneComponent*> ChildrenCompnents = RootComponent->GetAttachChildren();
+				TArray<USceneComponent*> ChildrenCompnents = TheRootComponent->GetAttachChildren();
 				for (USceneComponent* SceneComponent : ChildrenCompnents)
 				{
 					SceneComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), SceneComponent->GetAttachSocketName());
 				}
-				RootComponent->DestroyComponent();
+				TheRootComponent->DestroyComponent();
 			}
 
 			SetRootComponent(SkeletalMeshComponent);
