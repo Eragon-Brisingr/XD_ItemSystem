@@ -41,6 +41,8 @@ public class XD_ItemSystem_Editor : ModuleRules
 				"SlateCore",
                 "InputCore",
                 "EditorWidgets",
+                "UnrealEd",
+                "EditorStyle",
 
                 "XD_ItemSystem",
                 "XD_SaveGameSystem",

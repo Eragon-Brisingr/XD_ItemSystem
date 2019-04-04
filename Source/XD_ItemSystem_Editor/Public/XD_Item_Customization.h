@@ -11,6 +11,8 @@
 class XD_ITEMSYSTEM_EDITOR_API FXD_Item_Customization : public IPropertyTypeCustomizationMakeInstanceable<FXD_Item_Customization>
 {
 public:
+	FXD_Item_Customization();
+
 	/** IPropertyTypeCustomization interface */
 	virtual void CustomizeHeader(TSharedRef<class IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
 	virtual void CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
