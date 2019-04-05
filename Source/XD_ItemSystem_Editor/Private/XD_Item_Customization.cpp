@@ -37,27 +37,31 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 
 	TSharedRef<SXD_ItemPropertyEditorClass> XD_ItemPropertyEditorClass = SNew(SXD_ItemPropertyEditorClass)
 		.ShowTree(false)
+		.AllowAbstract(false)
 		.MetaClass(MetaClass)
 		.SelectedClass_Lambda([=]()
 			{
+				FXD_Item& Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
 				return Item.ItemClass;
 			})
 		.OnSetClass_Lambda([=](const UClass* ClassObject)
 			{
-				if (ClassObject)
+				TSubclassOf<AXD_ItemBase> ItemClass = const_cast<UClass*>(ClassObject);
+				FXD_Item& Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
+				if (ItemClass)
 				{
 					UObject* Outer = FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef());
 
-					TSubclassOf<AXD_ItemBase> ItemClass = const_cast<UClass*>(ClassObject);
 					UXD_ItemCoreBase* ItemCore = AXD_ItemBase::CreateItemCoreByType(ItemClass, Outer);
 					ItemCore->ItemClass = ItemClass;
 					ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
-					FPropertyCustomizeHelper::SetObjectValue(ItemCore_PropertyHandle, ItemCore);
+					Item.ItemCore = ItemCore;
 				}
 				else
 				{
-					FPropertyCustomizeHelper::SetObjectValue(ItemCore_PropertyHandle, nullptr);
+					Item.ItemCore = nullptr;
 				}
+				Item.ItemClass = ItemClass;
 			});
 
 	if (!Item.bShowNumber)
