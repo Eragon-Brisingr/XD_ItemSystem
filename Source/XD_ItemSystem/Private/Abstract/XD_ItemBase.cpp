@@ -61,6 +61,7 @@ void AXD_ItemBase::GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(AXD_ItemBase, InnerItemCore, COND_InitialOnly);
+	DOREPLIFETIME(AXD_ItemBase, bItemSimulatePhysics);
 }
 
 bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags)
@@ -215,9 +216,15 @@ void AXD_ItemBase::SetItemCollisionProfileName(const FName& CollisionProfileName
 
 void AXD_ItemBase::SetItemSimulatePhysics(bool bSimulate)
 {
+	bItemSimulatePhysics = bSimulate;
+	OnRep_ItemSimulatePhysics();
+}
+
+void AXD_ItemBase::OnRep_ItemSimulatePhysics()
+{
 	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(RootComponent))
 	{
-		Root->SetSimulatePhysics(bSimulate);
+		Root->SetSimulatePhysics(bItemSimulatePhysics);
 	}
 }
 

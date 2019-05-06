@@ -23,15 +23,18 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 	TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_STRING_CHECKED(FXD_Item, ItemCore));
 
 	UClass* MetaClass = BaseItemClass;
-	FXD_Item& Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
-	if (TSubclassOf<AXD_ItemBase> ShowItemType = Item.ShowItemType)
+	FXD_Item* Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
+	if (Item)
 	{
-		MetaClass = ShowItemType;
-		if (Item.ItemCore && !Item.ItemCore->ItemClass->IsChildOf(Item.ShowItemType))
+		if (TSubclassOf<AXD_ItemBase> ShowItemType = Item->ShowItemType)
 		{
-			Item.ItemClass = Item.ShowItemType;
-			Item.ItemCore = AXD_ItemBase::CreateItemCoreByType(ShowItemType, FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef()));
-			Item.ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
+			MetaClass = ShowItemType;
+			if (Item->ItemCore && !Item->ItemCore->ItemClass->IsChildOf(Item->ShowItemType))
+			{
+				Item->ItemClass = Item->ShowItemType;
+				Item->ItemCore = AXD_ItemBase::CreateItemCoreByType(ShowItemType, FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef()));
+				Item->ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
+			}
 		}
 	}
 
@@ -41,30 +44,32 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 		.MetaClass(MetaClass)
 		.SelectedClass_Lambda([=]()
 			{
-				FXD_Item& Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
-				return Item.ItemClass;
+				FXD_Item* Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
+				return Item ? Item->ItemClass : nullptr;
 			})
 		.OnSetClass_Lambda([=](const UClass* ClassObject)
 			{
 				TSubclassOf<AXD_ItemBase> ItemClass = const_cast<UClass*>(ClassObject);
-				FXD_Item& Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
-				if (ItemClass)
+				if (FXD_Item* Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle))
 				{
-					UObject* Outer = FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef());
+					if (ItemClass)
+					{
+						UObject* Outer = FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef());
 
-					UXD_ItemCoreBase* ItemCore = AXD_ItemBase::CreateItemCoreByType(ItemClass, Outer);
-					ItemCore->ItemClass = ItemClass;
-					ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
-					Item.ItemCore = ItemCore;
+						UXD_ItemCoreBase* ItemCore = AXD_ItemBase::CreateItemCoreByType(ItemClass, Outer);
+						ItemCore->ItemClass = ItemClass;
+						ItemCore->SetFlags(RF_Public | RF_ArchetypeObject);
+						Item->ItemCore = ItemCore;
+					}
+					else
+					{
+						Item->ItemCore = nullptr;
+					}
+					Item->ItemClass = ItemClass;
 				}
-				else
-				{
-					Item.ItemCore = nullptr;
-				}
-				Item.ItemClass = ItemClass;
 			});
 
-	if (!Item.bShowNumber)
+	if (Item && !Item->bShowNumber)
 	{
 		HeaderRow.NameContent()
 			[

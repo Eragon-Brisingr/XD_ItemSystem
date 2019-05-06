@@ -56,6 +56,11 @@ public:
 	virtual void SetItemCollisionProfileName(const FName& CollisionProfileName);
 
 	virtual void SetItemSimulatePhysics(bool bSimulate);
+
+	UPROPERTY(ReplicatedUsing = "OnRep_ItemSimulatePhysics")
+	uint8 bItemSimulatePhysics : 1;
+	UFUNCTION()
+	void OnRep_ItemSimulatePhysics();
 public:
 #if WITH_EDITORONLY_DATA
 	//取消勾选则采用蓝图名
