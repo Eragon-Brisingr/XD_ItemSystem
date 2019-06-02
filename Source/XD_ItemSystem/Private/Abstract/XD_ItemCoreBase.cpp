@@ -118,17 +118,12 @@ class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APaw
 void UXD_ItemCoreBase::SettingSpawnedItem(class AXD_ItemBase* Item, int32 ThrowNumber) const
 {
 	Item->InnerItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(this, Item);
-	if (Item->CanCompositeItem() && Number >= Item->MinItemCompositeNumber)
+	Item->InnerItemCore->Number = Item->CanCompositeItem() ? ThrowNumber : 1;
+
+	if (Number >= Item->MinItemCompositeNumber)
 	{
-		Item->InnerItemCore->Number = ThrowNumber;
-	}
-	else
-	{
-		Item->InnerItemCore->Number = Item->MinItemCompositeNumber;
-		if (ThrowNumber > Item->MinItemCompositeNumber)
-		{
-			ItemSystem_Warning_LOG("SpawnItemActor : 无法叠加%s，申请道具数量%d，最小叠加数量%d", *UXD_ObjectFunctionLibrary::GetClassName(ItemClass), ThrowNumber, Item->MinItemCompositeNumber);
-		}
+		Item->InnerItemCore->Number = 1;
+		ItemSystem_Warning_LOG("SpawnItemActor : 无法叠加%s，申请道具数量%d，最小叠加数量%d，设置为1", *UXD_ObjectFunctionLibrary::GetClassName(ItemClass), ThrowNumber, Item->MinItemCompositeNumber);
 	}
 }
 
