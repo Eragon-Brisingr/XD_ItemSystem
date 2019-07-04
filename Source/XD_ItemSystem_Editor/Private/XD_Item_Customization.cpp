@@ -52,6 +52,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 				TSubclassOf<AXD_ItemBase> ItemClass = const_cast<UClass*>(ClassObject);
 				if (FXD_Item* Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle))
 				{
+					StructPropertyHandle->NotifyPreChange();
 					if (ItemClass)
 					{
 						UObject* Outer = FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef());
@@ -66,6 +67,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 						Item->ItemCore = nullptr;
 					}
 					Item->ItemClass = ItemClass;
+					StructPropertyHandle->NotifyPostChange(EPropertyChangeType::ValueSet);
 				}
 			});
 
@@ -121,7 +123,9 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 					{
 						if (UXD_ItemCoreBase* ItemCore = GetItemCore(ItemCore_PropertyHandle))
 						{
+							StructPropertyHandle->NotifyPreChange();
 							ItemCore->Number = NewNumber;
+							StructPropertyHandle->NotifyPostChange(EPropertyChangeType::ValueSet);
 						}
 					})
 				];
