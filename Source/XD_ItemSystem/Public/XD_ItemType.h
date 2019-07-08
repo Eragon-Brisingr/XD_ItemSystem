@@ -17,7 +17,7 @@ struct XD_ITEMSYSTEM_API FXD_Item
 public:
 	FXD_Item(class UXD_ItemCoreBase* ItemCore = nullptr);
 
-	explicit operator bool() const { return ItemCore ? true : false; }
+	explicit operator bool() const;
 
 	operator class UXD_ItemCoreBase*() const { return ItemCore; }
 

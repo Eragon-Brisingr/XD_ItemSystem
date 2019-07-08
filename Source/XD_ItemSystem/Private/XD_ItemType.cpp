@@ -30,3 +30,11 @@ FXD_Item::FXD_Item(UXD_ItemCoreBase* ItemCore): ItemCore(ItemCore)
 	ShowItemType = AXD_ItemBase::StaticClass();
 #endif
 }
+
+FXD_Item::operator bool() const
+{
+#if WITH_EDITOR
+	return ItemCore ? ItemCore->ItemClass == ItemClass : false;
+#endif
+	return ItemCore ? true : false;
+}

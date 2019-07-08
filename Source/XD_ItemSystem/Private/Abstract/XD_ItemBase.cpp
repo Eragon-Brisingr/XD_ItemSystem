@@ -24,6 +24,8 @@ AXD_ItemBase::AXD_ItemBase(const FObjectInitializer& ObjectInitializer /*= FObje
 
 	InnerItemCore = CreateDefaultSubobject<UXD_ItemCoreBase>(GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore));
 
+	SetRootComponent(CreateDefaultSubobject<USceneComponent>(USceneComponent::GetDefaultSceneRootVariableName()));
+
 #if WITH_EDITOR
 	BlueprintPreviewHelper = CreateEditorOnlyDefaultSubobject<UStaticMeshComponent>(TEXT("蓝图预览图用"), true);
 	if (BlueprintPreviewHelper)

@@ -20,14 +20,14 @@ class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
 public:
 	UXD_ItemCoreBase();
 
-	virtual bool IsSupportedForNetworking() const override;
+	bool IsSupportedForNetworking() const override;
 
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const;
+	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void PostInitProperties() override;
+	void PostInitProperties() override;
 
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 public:
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadOnly, Category = "物品", Replicated, meta = (ExposeOnSpawn = "true", DisplayName = "物品类型"))
@@ -43,10 +43,7 @@ public:
 	void OnRep_Number(int32 PreNumber);
 
 	template<typename ItemActorType = AXD_ItemBase>
-	const ItemActorType* GetItemDefaultActor() const
-	{
-		return ItemClass ? ItemClass->GetDefaultObject<ItemActorType>() : GetDefault<ItemActorType>();
-	}
+	const ItemActorType* GetItemDefaultActor() const { return ItemClass->GetDefaultObject<ItemActorType>(); }
 	
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	AActor* GetOwner() const;
