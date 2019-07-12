@@ -15,6 +15,7 @@ void FXD_ItemSystem_EditorModule::StartupModule()
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
 		RegisterCustomProperty(struct FXD_Item, FXD_Item_Customization);
+		RegisterCustomProperty(class UXD_ItemCoreBase, FXD_ItemCore_Customization);
 	}
 }
 

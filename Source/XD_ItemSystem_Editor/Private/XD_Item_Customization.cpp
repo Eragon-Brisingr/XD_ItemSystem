@@ -19,8 +19,8 @@ FXD_Item_Customization::FXD_Item_Customization()
 
 void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	TSharedPtr<IPropertyHandle> ItemClass_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_STRING_CHECKED(FXD_Item, ItemClass));
-	TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_STRING_CHECKED(FXD_Item, ItemCore));
+	TSharedPtr<IPropertyHandle> ItemClass_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_CHECKED(FXD_Item, ItemClass));
+	TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_CHECKED(FXD_Item, ItemCore));
 
 	UClass* MetaClass = BaseItemClass;
 	FXD_Item* Item = FPropertyCustomizeHelper::Value<FXD_Item>(StructPropertyHandle);
@@ -166,25 +166,15 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 
 void FXD_Item_Customization::CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	FPropertyCustomizeHelper::StructBuilderDrawPropertys(StructBuilder, StructPropertyHandle, { GET_MEMBER_NAME_STRING_CHECKED(FXD_Item, ItemCore), GET_MEMBER_NAME_STRING_CHECKED(FXD_Item, ItemClass) });
+	FPropertyCustomizeHelper::StructBuilderDrawPropertys(StructBuilder, StructPropertyHandle, { GET_MEMBER_NAME_CHECKED(FXD_Item, ItemCore), GET_MEMBER_NAME_CHECKED(FXD_Item, ItemClass) });
 
-	TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_STRING_CHECKED(FXD_Item, ItemCore));
+	TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle = FPropertyCustomizeHelper::GetPropertyHandleByName(StructPropertyHandle, GET_MEMBER_NAME_CHECKED(FXD_Item, ItemCore));
 	if (FPropertyCustomizeHelper::GetNumChildren(ItemCore_PropertyHandle.ToSharedRef()) > 0)
 	{
 		TSharedPtr<class IPropertyHandle> ItemCoreInstance_PropertyHandle = ItemCore_PropertyHandle->GetChildHandle(0);
-		for (uint32 Idx = 0; Idx < FPropertyCustomizeHelper::GetNumChildren(ItemCoreInstance_PropertyHandle.ToSharedRef()); ++Idx)
+		if (ItemCoreInstance_PropertyHandle.IsValid())
 		{
-			TSharedPtr<class IPropertyHandle> ItemCoreInstanceChild_PropertyHandle = ItemCoreInstance_PropertyHandle->GetChildHandle(Idx);
-
-			if (UProperty* Property = ItemCoreInstanceChild_PropertyHandle->GetProperty())
-			{
-				FString ItemCoreMemberCppName = Property->GetNameCPP();
-				if (ItemCoreMemberCppName != GET_MEMBER_NAME_STRING_CHECKED(UXD_ItemCoreBase, ItemClass)
-					&& ItemCoreMemberCppName != GET_MEMBER_NAME_STRING_CHECKED(UXD_ItemCoreBase, Number))
-				{
-					StructBuilder.AddProperty(ItemCoreInstance_PropertyHandle->GetChildHandle(Idx).ToSharedRef());
-				}
-			}
+			FPropertyCustomizeHelper::StructBuilderDrawPropertys(StructBuilder, ItemCoreInstance_PropertyHandle.ToSharedRef(), { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, ItemClass), GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) });
 		}
 	}
 }
@@ -201,6 +191,71 @@ class UXD_ItemCoreBase* FXD_Item_Customization::GetItemCore(TSharedPtr<IProperty
 		}
 	}
 	return nullptr;
+}
+
+void FXD_ItemCore_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+{
+	UXD_ItemCoreBase* ItemCore = FPropertyCustomizeHelper::GetValue<UXD_ItemCoreBase*>(StructPropertyHandle);
+
+	TSharedPtr<IPropertyHandle> ItemClass_PropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, ItemClass));
+	TSharedPtr<IPropertyHandle> Number_PropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number));
+
+	if (!ItemCore)
+	{
+		HeaderRow.NameContent()
+			[
+				StructPropertyHandle->CreatePropertyNameWidget()
+			]
+		.ValueContent()
+			.MinDesiredWidth(300.f)
+			[
+				SNew(SHorizontalBox)
+				+SHorizontalBox::Slot()
+				[
+					SNew(STextBlock)
+					.Text(LOCTEXT("Error_Null", "错误：空的道具核心"))
+				]
+				+ SHorizontalBox::Slot()
+				[
+					StructPropertyHandle->CreatePropertyValueWidget()
+				]
+			];
+	}
+	else
+	{
+		HeaderRow.NameContent()
+			[
+				StructPropertyHandle->CreatePropertyNameWidget()
+			]
+		.ValueContent()
+			.MinDesiredWidth(300.f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.FillWidth(2.f)
+				[
+					SNew(STextBlock)
+					.Text(ItemCore->ItemClass ? ItemCore->ItemClass->GetDisplayNameText() : LOCTEXT("Error_ClassNull", "错误：空的道具类"))
+				]
+				+ SHorizontalBox::Slot()
+				[
+					Number_PropertyHandle->CreatePropertyNameWidget()
+				]
+				+ SHorizontalBox::Slot()
+				[
+					Number_PropertyHandle->CreatePropertyValueWidget()
+				]
+			];
+	}
+}
+
+void FXD_ItemCore_Customization::CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+{
+	TSharedPtr<class IPropertyHandle> Instance = StructPropertyHandle->GetChildHandle(0);
+	if (Instance.IsValid())
+	{
+		FPropertyCustomizeHelper::StructBuilderDrawPropertys(StructBuilder, Instance.ToSharedRef(), { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, ItemClass), GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) });
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
