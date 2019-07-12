@@ -174,7 +174,7 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TS
 
 int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number)
 {
-	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ItemCore) {return ItemCore->ItemClass == Item; });
+	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ItemCore) {return ItemCore->GetItemClass() == Item; });
 }
 
 void UXD_InventoryComponentBase::GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
@@ -252,7 +252,7 @@ int32 UXD_InventoryComponentBase::GetItemNumberByType(TSubclassOf<class AXD_Item
 	int32 Number = 0;
 	for (UXD_ItemCoreBase* ElementItem : ItemCoreList)
 	{
-		if (ElementItem->ItemClass->IsChildOf(ItemClass))
+		if (ElementItem->GetItemClass()->IsChildOf(ItemClass))
 		{
 			Number += ElementItem->Number;
 		}
@@ -268,7 +268,7 @@ void UXD_InventoryComponentBase::ClearItem()
 
 class UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByType(TSubclassOf<class AXD_ItemBase> ItemType) const
 {
-	UXD_ItemCoreBase* const* p_NeedFindItem = ItemCoreList.FindByPredicate([&](UXD_ItemCoreBase* Item) {return Item->ItemClass->IsChildOf(ItemType); });
+	UXD_ItemCoreBase* const* p_NeedFindItem = ItemCoreList.FindByPredicate([&](UXD_ItemCoreBase* Item) {return Item->GetItemClass()->IsChildOf(ItemType); });
 	return p_NeedFindItem ? *p_NeedFindItem : nullptr;
 }
 
@@ -277,7 +277,7 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::FindItemsByType(TSub
 	TArray<class UXD_ItemCoreBase*> Items;
 	for (UXD_ItemCoreBase* ItemCore : ItemCoreList)
 	{
-		if (ItemCore->ItemClass->IsChildOf(ItemType))
+		if (ItemCore->GetItemClass()->IsChildOf(ItemType))
 		{
 			Items.Add(ItemCore);
 		}

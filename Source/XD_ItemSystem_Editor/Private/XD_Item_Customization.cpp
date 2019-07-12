@@ -29,7 +29,7 @@ void FXD_Item_Customization::CustomizeHeader(TSharedRef<class IPropertyHandle> S
 		if (TSubclassOf<AXD_ItemBase> ShowItemType = Item->ShowItemType)
 		{
 			MetaClass = ShowItemType;
-			if (Item->ItemCore && !Item->ItemCore->ItemClass->IsChildOf(Item->ShowItemType))
+			if (Item->ItemCore && !Item->ItemCore->GetItemClass()->IsChildOf(Item->ShowItemType))
 			{
 				Item->ItemClass = Item->ShowItemType;
 				Item->ItemCore = AXD_ItemBase::CreateItemCoreByType(ShowItemType, FPropertyCustomizeHelper::GetOuter(ItemCore_PropertyHandle.ToSharedRef()));

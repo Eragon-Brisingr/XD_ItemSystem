@@ -50,12 +50,6 @@ void AXD_ItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-#if WITH_EDITOR
-	if (InnerItemCore)
-	{
-		InnerItemCore->ItemClass = GetClass();
-	}
-#endif
 }
 
 void AXD_ItemBase::GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > & OutLifetimeProps) const
@@ -356,7 +350,7 @@ void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCore
 			ActorSpawnParameters.OverrideLevel = ThrowToLevel;
 			ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			ActorSpawnParameters.bDeferConstruction = true;
-			AXD_ItemBase* ItemActor = ThrowToLevel->GetWorld()->SpawnActor<AXD_ItemBase>(ItemCore->ItemClass, ThrowLocation, ThrowRotation, ActorSpawnParameters);
+			AXD_ItemBase* ItemActor = ThrowToLevel->GetWorld()->SpawnActor<AXD_ItemBase>(ItemCore->GetItemClass(), ThrowLocation, ThrowRotation, ActorSpawnParameters);
 			ItemActor->InnerItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, ItemActor);
 			ItemActor->InnerItemCore->Number = ThrowNumber;
 			ItemActor->FinishSpawning(FTransform(ThrowRotation, ThrowLocation));

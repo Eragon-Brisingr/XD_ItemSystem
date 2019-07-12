@@ -34,7 +34,7 @@ FXD_Item::FXD_Item(UXD_ItemCoreBase* ItemCore): ItemCore(ItemCore)
 FXD_Item::operator bool() const
 {
 #if WITH_EDITOR
-	return ItemCore ? ItemCore->ItemClass == ItemClass : false;
+	return ItemCore ? ItemCore->GetItemClass() == ItemClass : false;
 #endif
 	return ItemCore ? true : false;
 }

@@ -9,7 +9,7 @@
 
 
 UXD_ItemCoreBase::UXD_ItemCoreBase()
-	:ItemClass(AXD_ItemBase::StaticClass())
+	:ItemClass(nullptr)
 {
 	
 }
@@ -85,7 +85,7 @@ class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, 
 		ActorSpawnParameters.bDeferConstruction = true;
 		ActorSpawnParameters.OverrideLevel = OuterLevel;
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
-		if (AXD_ItemBase* SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AXD_ItemBase>(ItemClass, Location, Rotation, ActorSpawnParameters))
+		if (AXD_ItemBase* SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AXD_ItemBase>(GetItemClass(), Location, Rotation, ActorSpawnParameters))
 		{
 			SettingSpawnedItem(SpawnedItem, ItemNumber);
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
@@ -105,7 +105,7 @@ class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APaw
 		ActorSpawnParameters.Instigator = Instigator;
 		ActorSpawnParameters.OverrideLevel = Owner->GetLevel();
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
-		if (AXD_ItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AXD_ItemBase>(ItemClass, Location, Rotation, ActorSpawnParameters))
+		if (AXD_ItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AXD_ItemBase>(GetItemClass(), Location, Rotation, ActorSpawnParameters))
 		{
 			SettingSpawnedItem(SpawnedItem, ItemNumber);
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
@@ -123,13 +123,13 @@ void UXD_ItemCoreBase::SettingSpawnedItem(class AXD_ItemBase* Item, int32 ThrowN
 	if (Number < Item->MinItemCompositeNumber && Number != 1)
 	{
 		Item->InnerItemCore->Number = 1;
-		ItemSystem_Warning_LOG("SpawnItemActor : 无法叠加%s，申请道具数量%d，最小叠加数量%d，设置为1", *UXD_ObjectFunctionLibrary::GetClassName(ItemClass), ThrowNumber, Item->MinItemCompositeNumber);
+		ItemSystem_Warning_LOG("SpawnItemActor : 无法叠加%s，申请道具数量%d，最小叠加数量%d，设置为1", *UXD_ObjectFunctionLibrary::GetClassName(GetItemClass()), ThrowNumber, Item->MinItemCompositeNumber);
 	}
 }
 
 bool UXD_ItemCoreBase::CanCompositeInInventory() const
 {
-	return ItemClass.GetDefaultObject()->bCanCompositeInInventory;
+	return GetItemClass().GetDefaultObject()->bCanCompositeInInventory;
 }
 
 bool UXD_ItemCoreBase::IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const
@@ -141,7 +141,7 @@ bool UXD_ItemCoreBase::IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) con
 	if (this && ItemCore)
 	{
 		return GetClass() == ItemCore->GetClass() 
-				&& ItemClass == ItemCore->ItemClass 
+				&& GetItemClass() == ItemCore->GetItemClass() 
 				&& RecevieIsEqualWithItemCore(ItemCore);
 	}
 	return false;

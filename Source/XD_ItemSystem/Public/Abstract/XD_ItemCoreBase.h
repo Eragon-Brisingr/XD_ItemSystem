@@ -8,6 +8,8 @@
 #include "XD_ItemType.h"
 #include "XD_ItemCoreBase.generated.h"
 
+class AXD_ItemBase;
+
 /**
  * 
  */
@@ -31,7 +33,9 @@ public:
 #endif //WITH_EDITOR
 public:
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadOnly, Category = "物品", Replicated, meta = (ExposeOnSpawn = "true", DisplayName = "物品类型"))
-	TSubclassOf<class AXD_ItemBase> ItemClass;
+	TSubclassOf<AXD_ItemBase> ItemClass;
+
+	FORCEINLINE TSubclassOf<AXD_ItemBase> GetItemClass() const { return ItemClass.Get(); }
 	
 	UPROPERTY(BlueprintReadOnly, Category = "物品")
 	class UXD_InventoryComponentBase* OwingInventory;
@@ -43,7 +47,7 @@ public:
 	void OnRep_Number(int32 PreNumber);
 
 	template<typename ItemActorType = AXD_ItemBase>
-	const ItemActorType* GetItemDefaultActor() const { return ItemClass->GetDefaultObject<ItemActorType>(); }
+	const ItemActorType* GetItemDefaultActor() const { return GetItemClass()->GetDefaultObject<ItemActorType>(); }
 	
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	AActor* GetOwner() const;
