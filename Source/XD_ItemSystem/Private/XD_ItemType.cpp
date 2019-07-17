@@ -5,11 +5,6 @@
 #include "XD_ItemBase.h"
 
 
-uint32 GetTypeHash(const FXD_Item& Item)
-{
-	return GetTypeHash(Item.ItemCore);
-}
-
 bool operator==(const FXD_Item& LHS, const FXD_Item& RHS)
 {
 	if (LHS.ItemCore == RHS.ItemCore)

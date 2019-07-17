@@ -36,7 +36,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category = "Item", meta = (DisplayName = "道具详情"), SaveGame)
 	class UXD_ItemCoreBase* ItemCore;
 
-	friend uint32 GetTypeHash(const FXD_Item& Item);
+	friend uint32 GetTypeHash(const FXD_Item& Item) { return GetTypeHash((UObject*)Item.ItemCore); }
 
 	friend bool operator==(const FXD_Item& LHS, const FXD_Item& RHS);
 };
