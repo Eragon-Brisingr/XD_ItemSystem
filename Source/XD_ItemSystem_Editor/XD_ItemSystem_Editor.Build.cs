@@ -43,6 +43,7 @@ public class XD_ItemSystem_Editor : ModuleRules
                 "EditorWidgets",
                 "UnrealEd",
                 "EditorStyle",
+                "PropertyEditor",
 
                 "XD_ItemSystem",
                 "XD_SaveGameSystem",
