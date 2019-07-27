@@ -40,7 +40,7 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-	UPROPERTY(EditAnywhere, Category = "背包", meta = (DisplayName = "初始道具"))
+	UPROPERTY(EditAnywhere, Category = "配置|常用", meta = (DisplayName = "初始道具"))
 	TArray<FXD_Item> InitItems;
 
 //回调事件
