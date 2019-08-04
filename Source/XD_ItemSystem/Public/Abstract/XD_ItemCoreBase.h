@@ -9,6 +9,7 @@
 #include "XD_ItemCoreBase.generated.h"
 
 class AXD_ItemBase;
+class UXD_InventoryComponentBase;
 
 /**
  * 
@@ -35,10 +36,10 @@ public:
 	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadOnly, Category = "物品", Replicated, meta = (ExposeOnSpawn = "true", DisplayName = "物品类型"))
 	TSubclassOf<AXD_ItemBase> ItemClass;
 
-	FORCEINLINE TSubclassOf<AXD_ItemBase> GetItemClass() const { return ItemClass.Get(); }
+	FORCEINLINE TSubclassOf<AXD_ItemBase> GetItemClass() const { return ItemClass; }
 	
 	UPROPERTY(BlueprintReadOnly, Category = "物品")
-	class UXD_InventoryComponentBase* OwingInventory;
+	UXD_InventoryComponentBase* OwingInventory;
 	
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (ExposeOnSpawn = "true", DisplayName = "数量", ClampMin = "1"))
 	int32 Number = 1;
@@ -54,12 +55,12 @@ public:
 	//生成实体
 public:
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
-	class AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
-	class AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 private:
-	void SettingSpawnedItem(class AXD_ItemBase* Item, int32 Number) const;
+	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")

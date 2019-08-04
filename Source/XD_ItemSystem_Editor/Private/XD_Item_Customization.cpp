@@ -250,10 +250,13 @@ void FXD_ItemCore_Customization::CustomizeHeader(TSharedRef<class IPropertyHandl
 
 void FXD_ItemCore_Customization::CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-	TSharedPtr<class IPropertyHandle> Instance = StructPropertyHandle->GetChildHandle(0);
-	if (Instance.IsValid())
+	if (FPropertyCustomizeHelper::GetNumChildren(StructPropertyHandle) > 0)
 	{
-		FPropertyCustomizeHelper::StructBuilderDrawPropertys(StructBuilder, Instance.ToSharedRef(), { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, ItemClass), GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) });
+		TSharedPtr<class IPropertyHandle> Instance = StructPropertyHandle->GetChildHandle(0);
+		if (Instance.IsValid())
+		{
+			FPropertyCustomizeHelper::StructBuilderDrawPropertys(StructBuilder, Instance.ToSharedRef(), { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, ItemClass), GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) });
+		}
 	}
 }
 

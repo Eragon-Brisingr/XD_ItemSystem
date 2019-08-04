@@ -6,6 +6,9 @@
 #include <SubclassOf.h>
 #include "XD_ItemType.generated.h"
 
+class AXD_ItemBase;
+class UXD_ItemCoreBase;
+
 /**
  * 
  */
@@ -15,11 +18,11 @@ struct XD_ITEMSYSTEM_API FXD_Item
 {
 	GENERATED_BODY()
 public:
-	FXD_Item(class UXD_ItemCoreBase* ItemCore = nullptr);
+	FXD_Item(UXD_ItemCoreBase* ItemCore = nullptr);
 
 	explicit operator bool() const;
 
-	operator class UXD_ItemCoreBase*() const { return ItemCore; }
+	operator UXD_ItemCoreBase*() const { return ItemCore; }
 
 	UXD_ItemCoreBase* operator->() const { return ItemCore; }
 
@@ -28,13 +31,13 @@ public:
 	uint8 bShowNumber : 1;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (DisplayName = "显示道具类型"))
-	TSubclassOf<class AXD_ItemBase> ShowItemType;
+	TSubclassOf<AXD_ItemBase> ShowItemType;
 
 	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayName = "道具类型"))
-	TSubclassOf<class AXD_ItemBase> ItemClass;
+	TSubclassOf<AXD_ItemBase> ItemClass;
 #endif
 	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category = "Item", meta = (DisplayName = "道具详情"), SaveGame)
-	class UXD_ItemCoreBase* ItemCore;
+	UXD_ItemCoreBase* ItemCore;
 
 	friend uint32 GetTypeHash(const FXD_Item& Item) { return GetTypeHash((UObject*)Item.ItemCore); }
 
