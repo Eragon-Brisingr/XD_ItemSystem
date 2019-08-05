@@ -6,6 +6,7 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include "XD_ItemBase.h"
 #include "UnrealNetwork.h"
+#include "Utils/XD_ItemFunctionLibrary.h"
 
 
 // Sets default values for this component's properties
@@ -88,7 +89,7 @@ void UXD_InventoryComponentBase::PostEditChangeProperty(FPropertyChangedEvent& P
 }
 #endif
 
-TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
 	if (!ItemCore || Number <= 0)
 		return {};
@@ -106,7 +107,7 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const cl
 		}
 		else
 		{
-			UXD_ItemCoreBase* NewItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, this);
+			UXD_ItemCoreBase* NewItemCore = ItemCore->DeepDuplicateCore(this);
 			NewItemCore->Number = Number;
 			ItemCoreList.Add(NewItemCore);
 			OnRep_ItemList();
@@ -114,10 +115,10 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const cl
 		}
 	}
 
-	TArray<class UXD_ItemCoreBase*> Res;
+	TArray<UXD_ItemCoreBase*> Res;
 	for (int i = 0; i < Number; ++i)
 	{
-		UXD_ItemCoreBase* NewItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, this);
+		UXD_ItemCoreBase* NewItemCore = ItemCore->DeepDuplicateCore(this);
 		Res.Add(NewItemCore);
 		NewItemCore->Number = 1;
 		ItemCoreList.Add(NewItemCore);
@@ -129,7 +130,7 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const cl
 template<typename TPredicate>
 int32 RemoveItemByPredicate(UXD_InventoryComponentBase* Inventory, int32 &Number, const TPredicate& Predicate)
 {
-	TArray<class UXD_ItemCoreBase *> &ItemCoreList = Inventory->ItemCoreList;
+	TArray<UXD_ItemCoreBase *> &ItemCoreList = Inventory->ItemCoreList;
 	int32 RemovedNumber = 0;
 	for (int i = 0; i < ItemCoreList.Num(); ++i)
 	{
@@ -158,12 +159,12 @@ int32 RemoveItemByPredicate(UXD_InventoryComponentBase* Inventory, int32 &Number
 	return RemovedNumber;
 }
 
-int32 UXD_InventoryComponentBase::RemoveItemCore(const class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+int32 UXD_InventoryComponentBase::RemoveItemCore(const UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
 	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
 }
 
-TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number /*= 1*/)
+TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TSubclassOf<AXD_ItemBase> Item, int32 Number /*= 1*/)
 {
 	if (Item)
 	{
@@ -172,12 +173,12 @@ TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TS
 	return {};
 }
 
-int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<class AXD_ItemBase> Item, int32 Number)
+int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<AXD_ItemBase> Item, int32 Number)
 {
 	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ItemCore) {return ItemCore->GetItemClass() == Item; });
 }
 
-void UXD_InventoryComponentBase::GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+void UXD_InventoryComponentBase::GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
 	int32 AddNumber = OtherInventory->RemoveItemCore(ItemCore, Number);
 	if (AddNumber > 0)
@@ -203,7 +204,7 @@ ULevel* UXD_InventoryComponentBase::GetThrowedLevel()
 	return nullptr;
 }
 
-void UXD_InventoryComponentBase::ThrowItemCore(class UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
+void UXD_InventoryComponentBase::ThrowItemCore(UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
 	if (ULevel* ThrowLevel = GetThrowedLevel())
 	{
@@ -215,84 +216,10 @@ void UXD_InventoryComponentBase::ThrowItemCore(class UXD_ItemCoreBase* ItemCore,
 	}
 }
 
-int32 UXD_InventoryComponentBase::GetItemNumber(class AXD_ItemBase* Item)
-{
-	return Item ? GetItemNumberByCore(Item->GetItemCore()) : 0;
-}
-
-int32 UXD_InventoryComponentBase::GetItemNumberByCore(const class UXD_ItemCoreBase* ItemCore)
-{
-	if (ItemCore)
-	{
-		if (ItemCore->CanCompositeInInventory())
-		{
-			if (auto FindItem = ItemCoreList.FindByPredicate([ItemCore](auto& ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); }))
-			{
-				return (*FindItem)->Number;
-			}
-		}
-		else
-		{
-			int Number = 0;
-			for (UXD_ItemCoreBase* ItemCoreElement : ItemCoreList)
-			{
-				if (ItemCoreElement->IsEqualWithItemCore(ItemCore))
-				{
-					Number += 1;
-				}
-			}
-			return Number;
-		}
-	}
-	return 0;
-}
-
-int32 UXD_InventoryComponentBase::GetItemNumberByType(TSubclassOf<class AXD_ItemBase> ItemClass)
-{
-	int32 Number = 0;
-	for (UXD_ItemCoreBase* ElementItem : ItemCoreList)
-	{
-		if (ElementItem->GetItemClass()->IsChildOf(ItemClass))
-		{
-			Number += ElementItem->Number;
-		}
-	}
-	return Number;
-}
-
 void UXD_InventoryComponentBase::ClearItem()
 {
 	ItemCoreList.Empty();
 	OnRep_ItemList();
-}
-
-class UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByType(TSubclassOf<class AXD_ItemBase> ItemType) const
-{
-	UXD_ItemCoreBase* const* p_NeedFindItem = ItemCoreList.FindByPredicate([&](UXD_ItemCoreBase* Item) {return Item->GetItemClass()->IsChildOf(ItemType); });
-	return p_NeedFindItem ? *p_NeedFindItem : nullptr;
-}
-
-TArray<class UXD_ItemCoreBase*> UXD_InventoryComponentBase::FindItemsByType(TSubclassOf<class AXD_ItemBase> ItemType) const
-{
-	TArray<class UXD_ItemCoreBase*> Items;
-	for (UXD_ItemCoreBase* ItemCore : ItemCoreList)
-	{
-		if (ItemCore->GetItemClass()->IsChildOf(ItemType))
-		{
-			Items.Add(ItemCore);
-		}
-	}
-	return Items;
-}
-
-class UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByItemCore(class UXD_ItemCoreBase* ItemCore) const
-{
-	int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](auto& ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
-	if (ItemIndex != INDEX_NONE)
-	{
-		return ItemCoreList[ItemIndex];
-	}
-	return nullptr;
 }
 
 void UXD_InventoryComponentBase::AddItemArray(const TArray<FXD_Item>& Items)
@@ -327,4 +254,49 @@ void UXD_InventoryComponentBase::OnRep_ItemList()
 	}
 
 	PreItemCoreList = ItemCoreList;
+}
+
+int32 UXD_InventoryComponentBase::GetItemNumber(AXD_ItemBase* Item) const
+{
+	return UXD_ItemFunctionLibrary::GetItemNumber(ItemCoreList, Item);
+}
+
+int32 UXD_InventoryComponentBase::GetItemNumberByCore(const UXD_ItemCoreBase* ItemCore) const
+{
+	return UXD_ItemFunctionLibrary::GetItemNumberByCore(ItemCoreList, ItemCore);
+}
+
+int32 UXD_InventoryComponentBase::GetItemNumberByType(TSubclassOf<AXD_ItemBase> ItemClass) const
+{
+	return UXD_ItemFunctionLibrary::GetItemNumberByType(ItemCoreList, ItemClass);
+}
+
+bool UXD_InventoryComponentBase::ContainItem(const AXD_ItemBase* Item) const
+{
+	return UXD_ItemFunctionLibrary::ContainItem(ItemCoreList, Item);
+}
+
+bool UXD_InventoryComponentBase::ContainItemByCore(const UXD_ItemCoreBase* ItemCore) const
+{
+	return UXD_ItemFunctionLibrary::ContainItemByCore(ItemCoreList, ItemCore);
+}
+
+bool UXD_InventoryComponentBase::ContainItemByType(TSubclassOf<AXD_ItemBase> ItemClass) const
+{
+	return UXD_ItemFunctionLibrary::ContainItemByType(ItemCoreList, ItemClass);
+}
+
+UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByType(TSubclassOf<AXD_ItemBase> ItemType) const
+{
+	return UXD_ItemFunctionLibrary::FindItemByType(ItemCoreList, ItemType);
+}
+
+TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::FindItemsByType(TSubclassOf<AXD_ItemBase> ItemType) const
+{
+	return UXD_ItemFunctionLibrary::FindItemsByType(ItemCoreList, ItemType);
+}
+
+UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByItemCore(UXD_ItemCoreBase* ItemCore) const
+{
+	return UXD_ItemFunctionLibrary::FindItemByItemCore(ItemCoreList, ItemCore);
 }
