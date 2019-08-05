@@ -59,6 +59,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
 	AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品")
+	UXD_ItemCoreBase* DeepDuplicateCore(const UObject* Outer) const;
+	template<typename T>
+	T* DeepDuplicateCore(const UObject* Outer) const { return CastChecked<T>(DeepDuplicateCore(Outer)); }
 private:
 	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 

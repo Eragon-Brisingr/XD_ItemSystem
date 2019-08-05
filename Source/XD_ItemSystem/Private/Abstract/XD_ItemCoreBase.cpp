@@ -115,6 +115,11 @@ class AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APaw
 	return nullptr;
 }
 
+UXD_ItemCoreBase* UXD_ItemCoreBase::DeepDuplicateCore(const UObject* Outer) const
+{
+	return UXD_ObjectFunctionLibrary::DuplicateObject(this, Outer);
+}
+
 void UXD_ItemCoreBase::SettingSpawnedItem(class AXD_ItemBase* Item, int32 ThrowNumber) const
 {
 	Item->InnerItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(this, Item);
