@@ -107,7 +107,7 @@ TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const UXD_Item
 		}
 		else
 		{
-			UXD_ItemCoreBase* NewItemCore = ItemCore->DeepDuplicateCore(this);
+			UXD_ItemCoreBase* NewItemCore = UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, this);
 			NewItemCore->Number = Number;
 			ItemCoreList.Add(NewItemCore);
 			OnRep_ItemList();
@@ -118,7 +118,7 @@ TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const UXD_Item
 	TArray<UXD_ItemCoreBase*> Res;
 	for (int i = 0; i < Number; ++i)
 	{
-		UXD_ItemCoreBase* NewItemCore = ItemCore->DeepDuplicateCore(this);
+		UXD_ItemCoreBase* NewItemCore = UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, this);
 		Res.Add(NewItemCore);
 		NewItemCore->Number = 1;
 		ItemCoreList.Add(NewItemCore);
@@ -206,12 +206,17 @@ ULevel* UXD_InventoryComponentBase::GetThrowedLevel()
 
 void UXD_InventoryComponentBase::ThrowItemCore(UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
+	if (!ItemCore)
+	{
+		return;
+	}
+
 	if (ULevel* ThrowLevel = GetThrowedLevel())
 	{
 		int32 RemoveNumber = RemoveItemCore(ItemCore, Number);
 		if (RemoveNumber > 0)
 		{
-			ItemCore->BeThrowed(GetOwner(), RemoveNumber, ThrowLevel);
+			ItemCore->WhenThrow(GetOwner(), RemoveNumber, ThrowLevel);
 		}
 	}
 }

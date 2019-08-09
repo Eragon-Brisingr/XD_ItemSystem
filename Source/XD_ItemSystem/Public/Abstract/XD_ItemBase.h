@@ -144,10 +144,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	bool IsEqualWithItemCore(const class UXD_ItemCoreBase* CompareItemCore) const;
 
-	//默认扔出单一物品，若希望扔出一组，可重载
+	//实现丢弃时的行为
 	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
-	void BeThrowedImpl(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const;
-	virtual void BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const;
+	void WhenThrow(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const;
+	virtual void WhenThrow_Implementation(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础")
 	void WhenRemoveFromInventory(class AActor* ItemOwner, class UXD_ItemCoreBase* ItemCore, int32 RemoveNumber, int32 ExistNumber) const;

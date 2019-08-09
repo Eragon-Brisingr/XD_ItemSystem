@@ -99,7 +99,7 @@ void UXD_ItemFunctionLibrary::AddItemNumberImpl(TArray<UXD_ItemCoreBase*>& ItemC
 	int32 Idx = ItemCoreList.IndexOfByPredicate([&](UXD_ItemCoreBase* E) {return E->IsEqualWithItemCore(AddItemCore); });
 	if (Idx == INDEX_NONE)
 	{
-		UXD_ItemCoreBase* AddedItemCore = AddItemCore->DeepDuplicateCore<UXD_ItemCoreBase>(Outer);
+		UXD_ItemCoreBase* AddedItemCore = UXD_ItemCoreBase::DeepDuplicateCore(AddItemCore, Outer);
 		AddedItemCore->Number = AddNumber;
 		ItemCoreList.Add(AddedItemCore);
 	}

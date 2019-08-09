@@ -7,6 +7,7 @@
 #include <Engine/ActorChannel.h>
 #include "XD_ActorFunctionLibrary.h"
 #include "XD_ItemSystemUtility.h"
+#include "Engine/World.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
 
@@ -325,7 +326,7 @@ const class UXD_ItemCoreBase* AXD_ItemBase::GetItemCore() const
 
 class UXD_ItemCoreBase* AXD_ItemBase::CreateItemCore(UObject* Outer) const
 {
-	return UXD_ObjectFunctionLibrary::DuplicateObject(InnerItemCore, Outer);
+	return UXD_ItemCoreBase::DeepDuplicateCore(InnerItemCore, Outer);
 }
 
 bool AXD_ItemBase::IsEqualWithItem(const AXD_ItemBase* Item) const
@@ -338,7 +339,7 @@ bool AXD_ItemBase::IsEqualWithItemCore(const class UXD_ItemCoreBase* CompareItem
 	return this && InnerItemCore && InnerItemCore->IsEqualWithItemCore(CompareItemCore);
 }
 
-void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const
+void AXD_ItemBase::WhenThrow_Implementation(AActor* WhoThrowed, UXD_ItemCoreBase* ItemCore, int32 ThrowNumber, ULevel* ThrowToLevel) const
 {
 	if (WhoThrowed)
 	{
@@ -346,14 +347,8 @@ void AXD_ItemBase::BeThrowedImpl_Implementation(AActor* WhoThrowed, UXD_ItemCore
 		FRotator ThrowRotation = WhoThrowed->GetActorRotation();
 		if (ThrowNumber > MinItemCompositeNumber && CanCompositeItem())
 		{
-			FActorSpawnParameters ActorSpawnParameters;
-			ActorSpawnParameters.OverrideLevel = ThrowToLevel;
-			ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			ActorSpawnParameters.bDeferConstruction = true;
-			AXD_ItemBase* ItemActor = ThrowToLevel->GetWorld()->SpawnActor<AXD_ItemBase>(ItemCore->GetItemClass(), ThrowLocation, ThrowRotation, ActorSpawnParameters);
-			ItemActor->InnerItemCore = UXD_ObjectFunctionLibrary::DuplicateObject(ItemCore, ItemActor);
-			ItemActor->InnerItemCore->Number = ThrowNumber;
-			ItemActor->FinishSpawning(FTransform(ThrowRotation, ThrowLocation));
+			AXD_ItemBase* SpawnedItem = ItemCore->SpawnItemActorInLevel(ThrowToLevel, ThrowNumber, ThrowLocation, ThrowRotation);
+			SpawnedItem->WhenItemInWorldSetting();
 		}
 		else
 		{

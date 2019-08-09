@@ -60,10 +60,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
 	AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品")
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品", meta = (DeterminesOutputType = "self"))
 	UXD_ItemCoreBase* DeepDuplicateCore(const UObject* Outer) const;
 	template<typename T>
-	T* DeepDuplicateCore(const UObject* Outer) const { return CastChecked<T>(DeepDuplicateCore(Outer)); }
+	static T* DeepDuplicateCore(const T* ItemCore, const UObject* Outer) 
+	{
+		static_assert(TIsDerivedFrom<T, UXD_ItemCoreBase>::IsDerived, "T must be derived from UXD_ItemCoreBase");
+		return CastChecked<T>(ItemCore->DeepDuplicateCore(Outer));
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject))
+	AXD_ItemBase* SpawnPreviewItemActor(const UObject* WorldContextObject);
 private:
 	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 
@@ -82,7 +89,7 @@ public:
 	FText GetItemName() const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	void BeThrowed(AActor* WhoThrowed, int32 RemoveNumber, ULevel* ThrowLevel);
+	void WhenThrow(AActor* WhoThrowed, int32 RemoveNumber, ULevel* ThrowLevel);
 
 	void WhenRemoveFromInventory(class AActor* ItemOwner, int32 RemoveNumber, int32 ExistNumber);
 };
