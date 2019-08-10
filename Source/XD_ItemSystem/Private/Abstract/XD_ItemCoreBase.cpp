@@ -125,7 +125,7 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContex
 {
 	FActorSpawnParameters ActorSpawnParameters;
 	ActorSpawnParameters.bDeferConstruction = true;
-	//ActorSpawnParameters.ObjectFlags = RF_Transient;
+	ActorSpawnParameters.ObjectFlags = RF_Transient;
 	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AXD_ItemBase* SpawnedItem = WorldContextObject->GetWorld()->SpawnActor<AXD_ItemBase>(GetItemClass(), ActorSpawnParameters);
 	if (SpawnedItem)

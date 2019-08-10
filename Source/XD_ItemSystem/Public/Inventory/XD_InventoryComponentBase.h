@@ -121,10 +121,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	bool ContainItemByType(TSubclassOf<AXD_ItemBase> ItemClass) const;
 
-	UFUNCTION(BlueprintCallable, Category = "背包")
+	UFUNCTION(BlueprintCallable, Category = "背包", meta = (DeterminesOutputType = "ItemType"))
 	UXD_ItemCoreBase* FindItemByType(TSubclassOf<AXD_ItemBase> ItemType) const;
 
-	UFUNCTION(BlueprintCallable, Category = "背包")
+	UFUNCTION(BlueprintCallable, Category = "背包", meta = (DeterminesOutputType = "ItemType"))
 	TArray<UXD_ItemCoreBase*> FindItemsByType(TSubclassOf<AXD_ItemBase> ItemType) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
