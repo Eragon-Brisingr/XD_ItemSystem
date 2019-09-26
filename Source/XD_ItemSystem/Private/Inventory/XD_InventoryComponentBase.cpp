@@ -27,9 +27,6 @@ void UXD_InventoryComponentBase::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-#if WITH_EDITOR
-	InitItemsType = AXD_ItemBase::StaticClass();
-#endif
 }
 
 
@@ -77,15 +74,6 @@ void UXD_InventoryComponentBase::WhenPostLoad_Implementation()
 void UXD_InventoryComponentBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	if (InitItemsType && PropertyName == GET_MEMBER_NAME_CHECKED(UXD_InventoryComponentBase, InitItems))
-	{
-		for (FXD_Item& Item : InitItems)
-		{
-			Item.ShowItemType = InitItemsType;
-		}
-	}
 }
 #endif
 
@@ -164,18 +152,18 @@ int32 UXD_InventoryComponentBase::RemoveItemCore(const UXD_ItemCoreBase* ItemCor
 	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
 }
 
-TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TSubclassOf<AXD_ItemBase> Item, int32 Number /*= 1*/)
+TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreByType(TSubclassOf<UXD_ItemCoreBase> Item, int32 Number /*= 1*/)
 {
 	if (Item)
 	{
-		return AddItemCore(Item.GetDefaultObject()->GetItemCore(), Number);
+		return AddItemCore(Item.GetDefaultObject(), Number);
 	}
 	return {};
 }
 
-int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<AXD_ItemBase> Item, int32 Number)
+int32 UXD_InventoryComponentBase::RemoveItemCoreByType(TSubclassOf<UXD_ItemCoreBase> Item, int32 Number)
 {
-	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ItemCore) {return ItemCore->GetItemClass() == Item; });
+	return RemoveItemByPredicate(this, Number, [&](UXD_ItemCoreBase* ItemCore) {return ItemCore->IsA(Item); });
 }
 
 void UXD_InventoryComponentBase::GetItemFromOther(UXD_InventoryComponentBase* OtherInventory, UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
@@ -227,14 +215,11 @@ void UXD_InventoryComponentBase::ClearItem()
 	OnRep_ItemList();
 }
 
-void UXD_InventoryComponentBase::AddItemArray(const TArray<FXD_Item>& Items)
+void UXD_InventoryComponentBase::AddItemArray(const TArray<UXD_ItemCoreBase*>& Items)
 {
-	for (const FXD_Item& Item : Items)
+	for (UXD_ItemCoreBase* ItemCore : Items)
 	{
-		if (Item.ItemCore)
-		{
-			AddItemCore(Item.ItemCore, Item.ItemCore->Number);
-		}
+		AddItemCore(ItemCore, ItemCore->Number);
 	}
 }
 
@@ -261,7 +246,7 @@ void UXD_InventoryComponentBase::OnRep_ItemList()
 	PreItemCoreList = ItemCoreList;
 }
 
-int32 UXD_InventoryComponentBase::GetItemNumber(AXD_ItemBase* Item) const
+int32 UXD_InventoryComponentBase::GetItemNumber(UXD_ItemCoreBase* Item) const
 {
 	return UXD_ItemFunctionLibrary::GetItemNumber(ItemCoreList, Item);
 }
@@ -271,12 +256,12 @@ int32 UXD_InventoryComponentBase::GetItemNumberByCore(const UXD_ItemCoreBase* It
 	return UXD_ItemFunctionLibrary::GetItemNumberByCore(ItemCoreList, ItemCore);
 }
 
-int32 UXD_InventoryComponentBase::GetItemNumberByType(TSubclassOf<AXD_ItemBase> ItemClass) const
+int32 UXD_InventoryComponentBase::GetItemNumberByType(TSubclassOf<UXD_ItemCoreBase> ItemClass) const
 {
 	return UXD_ItemFunctionLibrary::GetItemNumberByType(ItemCoreList, ItemClass);
 }
 
-bool UXD_InventoryComponentBase::ContainItem(const AXD_ItemBase* Item) const
+bool UXD_InventoryComponentBase::ContainItem(const UXD_ItemCoreBase* Item) const
 {
 	return UXD_ItemFunctionLibrary::ContainItem(ItemCoreList, Item);
 }
@@ -286,17 +271,17 @@ bool UXD_InventoryComponentBase::ContainItemByCore(const UXD_ItemCoreBase* ItemC
 	return UXD_ItemFunctionLibrary::ContainItemByCore(ItemCoreList, ItemCore);
 }
 
-bool UXD_InventoryComponentBase::ContainItemByType(TSubclassOf<AXD_ItemBase> ItemClass) const
+bool UXD_InventoryComponentBase::ContainItemByType(TSubclassOf<UXD_ItemCoreBase> ItemClass) const
 {
 	return UXD_ItemFunctionLibrary::ContainItemByType(ItemCoreList, ItemClass);
 }
 
-UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByType(TSubclassOf<AXD_ItemBase> ItemType) const
+UXD_ItemCoreBase* UXD_InventoryComponentBase::FindItemByType(TSubclassOf<UXD_ItemCoreBase> ItemType) const
 {
 	return UXD_ItemFunctionLibrary::FindItemByType(ItemCoreList, ItemType);
 }
 
-TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::FindItemsByType(TSubclassOf<AXD_ItemBase> ItemType) const
+TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::FindItemsByType(TSubclassOf<UXD_ItemCoreBase> ItemType) const
 {
 	return UXD_ItemFunctionLibrary::FindItemsByType(ItemCoreList, ItemType);
 }

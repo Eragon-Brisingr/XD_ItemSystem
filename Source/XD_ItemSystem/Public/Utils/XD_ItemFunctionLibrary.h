@@ -20,28 +20,28 @@ class XD_ITEMSYSTEM_API UXD_ItemFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintPure, Category = "背包")
-	static int32 GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item);
+	static int32 GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
 	static int32 GetItemNumberByCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* ItemCore);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
-	static int32 GetItemNumberByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemClass);
+	static int32 GetItemNumberByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemClass);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
-	static bool ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item);
+	static bool ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
 	static bool ContainItemByCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* ItemCore);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
-	static bool ContainItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemClass);
+	static bool ContainItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemClass);
 
 	UFUNCTION(BlueprintPure, Category = "背包", meta = (DeterminesOutputType = "ItemType"))
-	static UXD_ItemCoreBase* FindItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemType);
+	static UXD_ItemCoreBase* FindItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemType);
 
 	UFUNCTION(BlueprintPure, Category = "背包", meta = (DeterminesOutputType = "ItemType"))
-	static TArray<UXD_ItemCoreBase*> FindItemsByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemType);
+	static TArray<UXD_ItemCoreBase*> FindItemsByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemType);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
 	static UXD_ItemCoreBase* FindItemByItemCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, UXD_ItemCoreBase* ItemCore);

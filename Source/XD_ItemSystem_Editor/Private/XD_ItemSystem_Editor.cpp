@@ -5,25 +5,60 @@
 #include <PropertyEditorModule.h>
 #include "XD_PropertyCustomizationEx.h"
 #include "XD_Item_Customization.h"
+#include "Editor.h"
+#include "XD_ItemActorFactory.h"
+#include "AssetToolsModule.h"
+#include "AssetTypeActions_ItemCore.h"
+#include "XD_ItemCoreBase.h"
+#include "XD_ItemCoreBlueprint.h"
+
+struct FXD_Item;
 
 #define LOCTEXT_NAMESPACE "FXD_ItemSystemModule_Editor"
 
 void FXD_ItemSystem_EditorModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-	{
-		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
-		RegisterCustomProperty(struct FXD_Item, FXD_Item_Customization);
-		RegisterCustomProperty(class UXD_ItemCoreBase, FXD_ItemCore_Customization);
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	{
+		RegisterCustomProperty(UXD_ItemCoreBase, FXD_ItemCoreCustomization);
 	}
+
+	GEditor->ActorFactories.Add(NewObject<UXD_ItemActorFactory>());
+
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	{
+		AssetTypeActions_ItemCore = MakeShareable(new FAssetTypeActions_ItemCore());
+		AssetTools.RegisterAssetTypeActions(AssetTypeActions_ItemCore.ToSharedRef());
+	}
+
+	UThumbnailManager::Get().RegisterCustomRenderer(UXD_ItemCoreBlueprint::StaticClass(), UItemCore_ThumbnailRenderer::StaticClass());
 }
 
 void FXD_ItemSystem_EditorModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
-	
+
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+ 		PropertyModule.UnregisterCustomClassLayout(GET_TYPE_NAME_CHECKED(UXD_ItemCoreBase));
+	}
+
+	if (GEditor)
+	{
+		GEditor->ActorFactories.RemoveAll([](const UActorFactory* ActorFactory) { return ActorFactory->IsA<UXD_ItemActorFactory>(); });
+	}
+
+	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		AssetTools.UnregisterAssetTypeActions(AssetTypeActions_ItemCore.ToSharedRef());
+	}
+
+	//UThumbnailManager::Get().UnregisterCustomRenderer(UXD_ItemCoreBlueprint::StaticClass());
 }
 
 #undef LOCTEXT_NAMESPACE

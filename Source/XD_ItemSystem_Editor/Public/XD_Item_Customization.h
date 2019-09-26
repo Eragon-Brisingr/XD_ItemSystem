@@ -5,29 +5,14 @@
 #include "CoreMinimal.h"
 #include "XD_PropertyCustomizationEx.h"
 
-class AXD_ItemBase;
-
 /**
  * 
  */
-class XD_ITEMSYSTEM_EDITOR_API FXD_Item_Customization : public IPropertyTypeCustomizationMakeInstanceable<FXD_Item_Customization>
+class XD_ITEMSYSTEM_EDITOR_API FXD_ItemCoreCustomization : public IPropertyTypeCustomizationMakeInstanceable<FXD_ItemCoreCustomization>
 {
-public:
-	FXD_Item_Customization();
+	// 特殊Meta：
+	// ConfigUseItem[配置用道具]，为true一直显示数量
 
-	/** IPropertyTypeCustomization interface */
-	void CustomizeHeader(TSharedRef<class IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
-	void CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
-
-	TSubclassOf<AXD_ItemBase> BaseItemClass;
-private:
-	class UXD_ItemCoreBase* GetItemCore(TSharedPtr<IPropertyHandle> ItemCore_PropertyHandle) const;
-};
-
-class XD_ITEMSYSTEM_EDITOR_API FXD_ItemCore_Customization : public IPropertyTypeCustomizationMakeInstanceable<FXD_ItemCore_Customization>
-{
-public:
-	/** IPropertyTypeCustomization interface */
-	void CustomizeHeader(TSharedRef<class IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
-	void CustomizeChildren(TSharedRef<class IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils) override;
+	void CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
+	void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 };

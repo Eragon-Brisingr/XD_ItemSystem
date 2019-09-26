@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "XD_SaveGameInterface.h"
-#include "XD_ItemType.h"
 #include "XD_InventoryComponentBase.generated.h"
 
 class UXD_ItemCoreBase;
@@ -39,13 +38,11 @@ public:
 	//IXD_SaveGameInterface
 
 #if WITH_EDITOR
-	TSubclassOf<AXD_ItemBase> InitItemsType;
-
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-	UPROPERTY(EditAnywhere, Category = "配置|常用", meta = (DisplayName = "初始道具"))
-	TArray<FXD_Item> InitItems;
+	UPROPERTY(EditAnywhere, Category = "配置|常用", meta = (DisplayName = "初始道具", ConfigUseItem = true), Instanced)
+	TArray<UXD_ItemCoreBase*> InitItems;
 
 //回调事件
 public:
@@ -80,14 +77,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	int32 RemoveItemCore(const UXD_ItemCoreBase* ItemCore, int32 Number = 1);
 
-	void AddItemArray(const TArray<FXD_Item>& Items);
+	void AddItemArray(const TArray<UXD_ItemCoreBase*>& Items);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
-	TArray<UXD_ItemCoreBase*> AddItemCoreByType(TSubclassOf<AXD_ItemBase> Item, int32 Number = 1);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包", meta = (AllowAbstract = false))
+	TArray<UXD_ItemCoreBase*> AddItemCoreByType(TSubclassOf<UXD_ItemCoreBase> Item, int32 Number = 1);
 
 	//返回值是移除的道具数目
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
-	int32 RemoveItemCoreByType(TSubclassOf<AXD_ItemBase> Item, int32 Number = 1);
+	int32 RemoveItemCoreByType(TSubclassOf<UXD_ItemCoreBase> Item, int32 Number = 1);
 
 	//考虑网络的Owner
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
@@ -104,28 +101,28 @@ public:
 	// 功能函数
 public:
 	UFUNCTION(BlueprintCallable, Category = "背包")
-	int32 GetItemNumber(AXD_ItemBase* Item) const;
+	int32 GetItemNumber(UXD_ItemCoreBase* Item) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	int32 GetItemNumberByCore(const UXD_ItemCoreBase* ItemCore) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
-	int32 GetItemNumberByType(TSubclassOf<AXD_ItemBase> ItemClass) const;
+	int32 GetItemNumberByType(TSubclassOf<UXD_ItemCoreBase> ItemClass) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
-	bool ContainItem(const AXD_ItemBase* Item) const;
+	bool ContainItem(const UXD_ItemCoreBase* Item) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	bool ContainItemByCore(const UXD_ItemCoreBase* ItemCore) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
-	bool ContainItemByType(TSubclassOf<AXD_ItemBase> ItemClass) const;
+	bool ContainItemByType(TSubclassOf<UXD_ItemCoreBase> ItemClass) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包", meta = (DeterminesOutputType = "ItemType"))
-	UXD_ItemCoreBase* FindItemByType(TSubclassOf<AXD_ItemBase> ItemType) const;
+	UXD_ItemCoreBase* FindItemByType(TSubclassOf<UXD_ItemCoreBase> ItemType) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包", meta = (DeterminesOutputType = "ItemType"))
-	TArray<UXD_ItemCoreBase*> FindItemsByType(TSubclassOf<AXD_ItemBase> ItemType) const;
+	TArray<UXD_ItemCoreBase*> FindItemsByType(TSubclassOf<UXD_ItemCoreBase> ItemType) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	UXD_ItemCoreBase* FindItemByItemCore(UXD_ItemCoreBase* ItemCore) const;

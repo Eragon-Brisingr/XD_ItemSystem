@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 #include <Engine/EngineTypes.h>
 #include "UObject/NoExportTypes.h"
-#include "XD_ItemType.h"
 #include "XD_ItemCoreBase.generated.h"
 
 class AXD_ItemBase;
 class UXD_InventoryComponentBase;
+class UMaterialInterface;
 
 /**
  * 
  */
 
-UCLASS(Blueprintable, BlueprintType, EditInlineNew, collapsecategories)
+UCLASS(abstract, BlueprintType, EditInlineNew, collapsecategories)
 class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
 {
 	GENERATED_BODY()
@@ -33,40 +33,62 @@ public:
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 public:
-	UPROPERTY(SaveGame, VisibleAnywhere, BlueprintReadOnly, Category = "物品", Replicated, meta = (ExposeOnSpawn = "true", DisplayName = "物品类型"))
-	TSubclassOf<AXD_ItemBase> ItemClass;
-
-	FORCEINLINE TSubclassOf<AXD_ItemBase> GetItemClass() const { return ItemClass; }
-	
+	// TODO：需要删除
 	UPROPERTY(BlueprintReadOnly, Category = "物品")
 	UXD_InventoryComponentBase* OwingInventory;
 	
+	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名"))
+	FText ItemName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
+	TSoftObjectPtr<UObject> ItemMesh;
+	// TODO：材质复写，考虑缩略图情况
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型材质覆盖"))
+	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MeshMaterialOverrideList;
+
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (ExposeOnSpawn = "true", DisplayName = "数量", ClampMin = "1"))
 	int32 Number = 1;
-
 	UFUNCTION()
 	void OnRep_Number(int32 PreNumber);
-
-	template<typename ItemActorType = AXD_ItemBase>
-	const ItemActorType* GetItemDefaultActor() const { return GetItemClass()->GetDefaultObject<ItemActorType>(); }
 	
+	// 物品合并
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "物品模型可合并"))
+	uint8 bCanMergeItem : 1;
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "最小合并数目", ClampMin = "2", EditCondition = bCanMergeItem))
+	int32 MinItemMergeNumber = 5;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "道具合并时模型", AllowedClasses = "StaticMesh,SkeletalMesh", EditCondition = bCanMergeItem))
+	TSoftObjectPtr<UObject> ItemMergeMesh;
+	// TODO：材质复写，考虑缩略图情况
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "合并模型材质覆盖", EditCondition = bCanMergeItem))
+	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MergeMeshMaterialOverrideList;
+	
+	bool CanMergeItem() const { return bCanMergeItem && !ItemMergeMesh.IsNull(); }
+	UFUNCTION(BlueprintCallable, Category = "物品|基础")
+	bool IsMergedItem() const { return CanMergeItem() && Number >= MinItemMergeNumber; }
+	TSoftObjectPtr<UObject> GetCurrentItemModel() const;
+public:
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	AActor* GetOwner() const;
 	//生成实体
 public:
+	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass() const { return GetSpawnedItemClass(Number); }
+	virtual TSubclassOf<AXD_ItemBase> GetSpawnedItemClass(int32 SpawnedNumber) const;
+
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
 	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FName& Name = NAME_None, EObjectFlags InObjectFlags = RF_NoFlags, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
 	AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品", meta = (DeterminesOutputType = "self"))
-	UXD_ItemCoreBase* DeepDuplicateCore(const UObject* Outer) const;
+	UXD_ItemCoreBase* DeepDuplicateCore(const UObject* Outer, const FName& Name = NAME_None) const;
 	template<typename T>
-	static T* DeepDuplicateCore(const T* ItemCore, const UObject* Outer) 
+	static T* DeepDuplicateCore(const T* ItemCore, const UObject* Outer, const FName& Name = NAME_None) 
 	{
 		static_assert(TIsDerivedFrom<T, UXD_ItemCoreBase>::IsDerived, "T must be derived from UXD_ItemCoreBase");
-		return CastChecked<T>(ItemCore->DeepDuplicateCore(Outer));
+		return CastChecked<T>(ItemCore->DeepDuplicateCore(Outer, Name));
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject))
@@ -75,8 +97,10 @@ private:
 	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 
 public:
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "在背包中可以叠加"))
+	uint8 bCanCompositeInInventory : 1;
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	bool CanCompositeInInventory() const;
+	bool CanCompositeInInventory() const { return bCanCompositeInInventory; }
 
 	//若有增加物品的属性，且该属性可变，需重载
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
@@ -85,11 +109,11 @@ public:
 	bool RecevieIsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const;
 	bool RecevieIsEqualWithItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const { return true; }
 
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
+	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "物品|基础")
 	FText GetItemName() const;
+	virtual FText GetItemName_Implementation() const;
 
-	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	void WhenThrow(AActor* WhoThrowed, int32 RemoveNumber, ULevel* ThrowLevel);
-
-	void WhenRemoveFromInventory(class AActor* ItemOwner, int32 RemoveNumber, int32 ExistNumber);
+	// 道具被丢弃时的行为
+	virtual void WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* ThrowToLevel);
+	virtual void WhenRemoveFromInventory(class AActor* ItemOwner, int32 RemoveNumber, int32 ExistNumber);
 };

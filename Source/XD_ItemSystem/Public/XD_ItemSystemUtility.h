@@ -9,7 +9,7 @@
 /**
  * 
  */
-DECLARE_LOG_CATEGORY_EXTERN(XD_ItemSystem_Log, Log, All);
+XD_ITEMSYSTEM_API DECLARE_LOG_CATEGORY_EXTERN(XD_ItemSystem_Log, Log, All);
 #define ItemSystem_Display_Log(Format, ...) UE_LOG(XD_ItemSystem_Log, Log, TEXT(Format), ##__VA_ARGS__)
 #define ItemSystem_Warning_LOG(Format, ...) UE_LOG(XD_ItemSystem_Log, Warning, TEXT(Format), ##__VA_ARGS__)
 #define ItemSystem_Error_Log(Format, ...) UE_LOG(XD_ItemSystem_Log, Error, TEXT(Format), ##__VA_ARGS__)

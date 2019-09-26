@@ -5,9 +5,9 @@
 #include "XD_ItemBase.h"
 #include "XD_ItemCoreBase.h"
 
-int32 UXD_ItemFunctionLibrary::GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item)
+int32 UXD_ItemFunctionLibrary::GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item)
 {
-	return Item ? GetItemNumberByCore(ItemCoreList, Item->GetItemCore()) : 0;
+	return Item ? GetItemNumberByCore(ItemCoreList, Item) : 0;
 }
 
 int32 UXD_ItemFunctionLibrary::GetItemNumberByCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* ItemCore)
@@ -37,12 +37,12 @@ int32 UXD_ItemFunctionLibrary::GetItemNumberByCore(const TArray<UXD_ItemCoreBase
 	return 0;
 }
 
-int32 UXD_ItemFunctionLibrary::GetItemNumberByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemClass)
+int32 UXD_ItemFunctionLibrary::GetItemNumberByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemClass)
 {
 	int32 Number = 0;
 	for (UXD_ItemCoreBase* ElementItem : ItemCoreList)
 	{
-		if (ElementItem->GetItemClass()->IsChildOf(ItemClass))
+		if (ElementItem->IsA(ItemClass))
 		{
 			Number += ElementItem->Number;
 		}
@@ -50,7 +50,7 @@ int32 UXD_ItemFunctionLibrary::GetItemNumberByType(const TArray<UXD_ItemCoreBase
 	return Number;
 }
 
-bool UXD_ItemFunctionLibrary::ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item)
+bool UXD_ItemFunctionLibrary::ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item)
 {
 	return GetItemNumber(ItemCoreList, Item) > 0;
 }
@@ -60,23 +60,23 @@ bool UXD_ItemFunctionLibrary::ContainItemByCore(const TArray<UXD_ItemCoreBase*>&
 	return GetItemNumberByCore(ItemCoreList, ItemCore) > 0;
 }
 
-bool UXD_ItemFunctionLibrary::ContainItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemClass)
+bool UXD_ItemFunctionLibrary::ContainItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemClass)
 {
 	return GetItemNumberByType(ItemCoreList, ItemClass) > 0;
 }
 
-UXD_ItemCoreBase* UXD_ItemFunctionLibrary::FindItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemType)
+UXD_ItemCoreBase* UXD_ItemFunctionLibrary::FindItemByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemType)
 {
-	UXD_ItemCoreBase* const* p_NeedFindItem = ItemCoreList.FindByPredicate([&](UXD_ItemCoreBase* Item) {return Item->GetItemClass()->IsChildOf(ItemType); });
+	UXD_ItemCoreBase* const* p_NeedFindItem = ItemCoreList.FindByPredicate([&](UXD_ItemCoreBase* Item) {return Item->IsA(ItemType); });
 	return p_NeedFindItem ? *p_NeedFindItem : nullptr;
 }
 
-TArray<UXD_ItemCoreBase*> UXD_ItemFunctionLibrary::FindItemsByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<AXD_ItemBase> ItemType)
+TArray<UXD_ItemCoreBase*> UXD_ItemFunctionLibrary::FindItemsByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemType)
 {
 	TArray<UXD_ItemCoreBase*> Items;
 	for (UXD_ItemCoreBase* ItemCore : ItemCoreList)
 	{
-		if (ItemCore->GetItemClass()->IsChildOf(ItemType))
+		if (ItemCore->IsA(ItemType))
 		{
 			Items.Add(ItemCore);
 		}

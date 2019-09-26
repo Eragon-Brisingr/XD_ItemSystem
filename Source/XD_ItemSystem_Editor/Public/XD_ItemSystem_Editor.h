@@ -4,6 +4,8 @@
 
 #include "Modules/ModuleManager.h"
 
+class FAssetTypeActions_ItemCore;
+
 class FXD_ItemSystem_EditorModule : public IModuleInterface
 {
 public:
@@ -11,4 +13,7 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+	TSharedPtr<FAssetTypeActions_ItemCore> AssetTypeActions_ItemCore;
 };
