@@ -13,8 +13,9 @@
 
 #define LOCTEXT_NAMESPACE "物品" 
 
-UXD_ItemCoreBase::UXD_ItemCoreBase()
-	:ItemName(LOCTEXT("物品", "物品")),
+UXD_ItemCoreBase::UXD_ItemCoreBase(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
+	: Super(ObjectInitializer), 
+	ItemName(LOCTEXT("物品", "物品")),
 	bCanCompositeInInventory(true)
 {
 
@@ -83,23 +84,6 @@ AActor* UXD_ItemCoreBase::GetOwner() const
 	return OwingInventory ? OwingInventory->GetOwner() : nullptr;
 }
 
-TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSpawnedItemClass(int32 SpawnedNumber) const
-{
-	TSoftObjectPtr<UObject> MeshPtr = GetCurrentItemModel();
-	// TODO：异步加载
-	UObject* Mesh = MeshPtr.LoadSynchronous();
-	if (Mesh->IsA<UStaticMesh>())
-	{
-		return AXD_Item_StaticMesh::StaticClass();
-	}
-	else if (Mesh->IsA<USkeletalMesh>())
-	{
-		return AXD_Item_SkeletalMesh::StaticClass();
-	}
-	checkNoEntry();
-	return nullptr;
-}
-
 AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
 	if (OuterLevel)
@@ -146,6 +130,33 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 	return nullptr;
 }
 
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSpawnedItemClass(int32 SpawnedNumber) const
+{
+	TSoftObjectPtr<UObject> MeshPtr = GetCurrentItemModel();
+	// TODO：异步加载
+	UObject* Mesh = MeshPtr.LoadSynchronous();
+	if (Mesh->IsA<UStaticMesh>())
+	{
+		return GetStaticMeshActor();
+	}
+	else if (Mesh->IsA<USkeletalMesh>())
+	{
+		return GetSkeletalMeshActor();
+	}
+	checkNoEntry();
+	return nullptr;
+}
+
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetStaticMeshActor() const
+{
+	return AXD_Item_StaticMesh::StaticClass();
+}
+
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSkeletalMeshActor() const
+{
+	return AXD_Item_SkeletalMesh::StaticClass();
+}
+
 UXD_ItemCoreBase* UXD_ItemCoreBase::DeepDuplicateCore(const UObject* Outer, const FName& Name) const
 {
 	return UXD_ObjectFunctionLibrary::DuplicateObject(this, Outer, Name);
@@ -171,8 +182,8 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContex
 
 void UXD_ItemCoreBase::SettingSpawnedItem(AXD_ItemBase* Item, int32 ThrowNumber) const
 {
-	Item->InnerItemCore = UXD_ItemCoreBase::DeepDuplicateCore(this, Item, GET_MEMBER_NAME_CHECKED(AXD_ItemBase, InnerItemCore));
-	Item->InnerItemCore->Number = ThrowNumber;
+	Item->ItemCore = UXD_ItemCoreBase::DeepDuplicateCore(this, Item, GET_MEMBER_NAME_CHECKED(AXD_ItemBase, ItemCore));
+	Item->ItemCore->Number = ThrowNumber;
 }
 
 bool UXD_ItemCoreBase::IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const

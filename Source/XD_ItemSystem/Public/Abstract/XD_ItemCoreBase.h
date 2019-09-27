@@ -15,13 +15,13 @@ class UMaterialInterface;
  * 
  */
 
-UCLASS(abstract, BlueprintType, EditInlineNew, collapsecategories)
+UCLASS(abstract, BlueprintType, EditInlineNew)
 class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UXD_ItemCoreBase();
+	UXD_ItemCoreBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	bool IsSupportedForNetworking() const override;
 
@@ -72,9 +72,6 @@ public:
 	AActor* GetOwner() const;
 	//生成实体
 public:
-	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass() const { return GetSpawnedItemClass(Number); }
-	virtual TSubclassOf<AXD_ItemBase> GetSpawnedItemClass(int32 SpawnedNumber) const;
-
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
 	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FName& Name = NAME_None, EObjectFlags InObjectFlags = RF_NoFlags, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
@@ -93,6 +90,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject))
 	AXD_ItemBase* SpawnPreviewItemActor(const UObject* WorldContextObject);
+
+	// 获得生成的具体类型
+	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass() const { return GetSpawnedItemClass(Number); }
+	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass(int32 SpawnedNumber) const;
+
+	virtual TSubclassOf<AXD_ItemBase> GetStaticMeshActor() const;
+	virtual TSubclassOf<AXD_ItemBase> GetSkeletalMeshActor() const;
 private:
 	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 

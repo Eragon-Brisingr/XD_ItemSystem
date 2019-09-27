@@ -101,7 +101,7 @@ public:
 	// 功能函数
 public:
 	UFUNCTION(BlueprintCallable, Category = "背包")
-	int32 GetItemNumber(UXD_ItemCoreBase* Item) const;
+	int32 GetItemNumber(const AXD_ItemBase* Item) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	int32 GetItemNumberByCore(const UXD_ItemCoreBase* ItemCore) const;
@@ -110,7 +110,7 @@ public:
 	int32 GetItemNumberByType(TSubclassOf<UXD_ItemCoreBase> ItemClass) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
-	bool ContainItem(const UXD_ItemCoreBase* Item) const;
+	bool ContainItem(const AXD_ItemBase* Item) const;
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	bool ContainItemByCore(const UXD_ItemCoreBase* ItemCore) const;

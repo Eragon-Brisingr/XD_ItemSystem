@@ -5,9 +5,9 @@
 #include "XD_ItemBase.h"
 #include "XD_ItemCoreBase.h"
 
-int32 UXD_ItemFunctionLibrary::GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item)
+int32 UXD_ItemFunctionLibrary::GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item)
 {
-	return Item ? GetItemNumberByCore(ItemCoreList, Item) : 0;
+	return Item ? GetItemNumberByCore(ItemCoreList, Item->GetItemCoreConst()) : 0;
 }
 
 int32 UXD_ItemFunctionLibrary::GetItemNumberByCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* ItemCore)
@@ -50,7 +50,7 @@ int32 UXD_ItemFunctionLibrary::GetItemNumberByType(const TArray<UXD_ItemCoreBase
 	return Number;
 }
 
-bool UXD_ItemFunctionLibrary::ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item)
+bool UXD_ItemFunctionLibrary::ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item)
 {
 	return GetItemNumber(ItemCoreList, Item) > 0;
 }

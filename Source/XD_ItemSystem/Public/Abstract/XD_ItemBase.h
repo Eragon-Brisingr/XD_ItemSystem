@@ -34,15 +34,19 @@ public:
 	void PostInitializeComponents() override;
 
 	void OnConstruction(const FTransform& Transform) override;
-	//初始化模型
+	
 public:
 	//ISaveGameInterface
 	void WhenPostLoad_Implementation() override;
 	//End ISaveGameInterface
 
 public:
+	//初始化模型
 	virtual void InitItemMesh() {}
-
+protected:
+	void InitStaticMeshComponent(UStaticMeshComponent* StaticMeshComponent);
+	void InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMeshComponent);
+public:
 	//物品在世界中的处理
 	virtual void WhenItemInWorldSetting();
 
@@ -60,11 +64,11 @@ public:
 #endif //WITH_EDITOR
 
 public:
-	UPROPERTY(VisibleAnywhere, Instanced, SaveGame, ReplicatedUsing = OnRep_InnerItemCore, Category = "物品", meta = (DisplayName = "物品核心"))
-	class UXD_ItemCoreBase* InnerItemCore;
+	UPROPERTY(VisibleAnywhere, Instanced, SaveGame, ReplicatedUsing = OnRep_OwingItemCore, Category = "物品", meta = (DisplayName = "物品核心"))
+	class UXD_ItemCoreBase* ItemCore;
 
 	UFUNCTION()
-	virtual void OnRep_InnerItemCore();
+	virtual void OnRep_OwingItemCore();
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	int32 GetNumber() const;
@@ -80,13 +84,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "物品|基础")
 	FText GetItemName() const;
 
-	//物品属性重写
 public:
 	//非特殊情况不要去修改ItemCore的值，若要修改请使用CreateItemCore
 	UFUNCTION(BlueprintPure, Category = "物品", meta = (DisplayName = "Get Item Core"))
-	class UXD_ItemCoreBase* GetItemCore_Careful() const;
+	class UXD_ItemCoreBase* GetItemCore() const;
 
-	const class UXD_ItemCoreBase* GetItemCore() const;
+	const class UXD_ItemCoreBase* GetItemCoreConst() const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	class UXD_ItemCoreBase* CreateItemCore(UObject* Outer) const;
@@ -114,7 +117,7 @@ public:
 	UPROPERTY()
 	UStaticMeshComponent* StaticMeshComponent;
 
-	void InitItemMesh() override;
+	void InitItemMesh() override { InitStaticMeshComponent(StaticMeshComponent); }
 };
 
 UCLASS()
@@ -128,5 +131,5 @@ public:
 	UPROPERTY()
 	USkeletalMeshComponent* SkeletalMeshComponent;
 
-	void InitItemMesh() override;
+	void InitItemMesh() override { InitSkeletalMeshComponent(SkeletalMeshComponent); }
 };

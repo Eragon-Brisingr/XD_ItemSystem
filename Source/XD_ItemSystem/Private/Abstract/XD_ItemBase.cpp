@@ -42,7 +42,7 @@ void AXD_ItemBase::GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION(AXD_ItemBase, InnerItemCore, COND_InitialOnly);
+	DOREPLIFETIME_CONDITION(AXD_ItemBase, ItemCore, COND_InitialOnly);
 	DOREPLIFETIME(AXD_ItemBase, bItemSimulatePhysics);
 }
 
@@ -50,9 +50,9 @@ bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutB
 {
 	bool IsFailed = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
-	if (InnerItemCore)
+	if (ItemCore)
 	{
-		IsFailed |= Channel->ReplicateSubobject(InnerItemCore, *Bunch, *RepFlags);
+		IsFailed |= Channel->ReplicateSubobject(ItemCore, *Bunch, *RepFlags);
 	}
 
 	return IsFailed;
@@ -68,7 +68,7 @@ void AXD_ItemBase::PostInitializeComponents()
 
 void AXD_ItemBase::OnConstruction(const FTransform& Transform)
 {
-	if (InnerItemCore)
+	if (ItemCore)
 	{
 		InitItemMesh();
 	}
@@ -77,6 +77,22 @@ void AXD_ItemBase::OnConstruction(const FTransform& Transform)
 void AXD_ItemBase::WhenPostLoad_Implementation()
 {
 	InitItemMesh();
+}
+
+void AXD_ItemBase::InitStaticMeshComponent(UStaticMeshComponent* StaticMeshComponent)
+{
+	TSoftObjectPtr<UObject> StaticMesh = ItemCore->IsMergedItem() ? ItemCore->ItemMergeMesh : ItemCore->ItemMesh;
+	// TODO：异步加载
+	UStaticMesh* ItemMesh = CastChecked<UStaticMesh>(StaticMesh.LoadSynchronous());
+	StaticMeshComponent->SetStaticMesh(ItemMesh);
+}
+
+void AXD_ItemBase::InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMeshComponent)
+{
+	TSoftObjectPtr<UObject> SkeletalMesh = ItemCore->IsMergedItem() ? ItemCore->ItemMergeMesh : ItemCore->ItemMesh;
+	// TODO：异步加载
+	USkeletalMesh* ItemMesh = CastChecked<USkeletalMesh>(SkeletalMesh.LoadSynchronous());
+	SkeletalMeshComponent->SetSkeletalMesh(ItemMesh);
 }
 
 void AXD_ItemBase::WhenItemInWorldSetting()
@@ -125,7 +141,7 @@ void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 	FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number))
 	{
-		if (InnerItemCore->GetSpawnedItemClass() == GetClass())
+		if (ItemCore->GetSpawnedItemClass() == GetClass())
 		{
 			InitItemMesh();
 		}
@@ -139,9 +155,9 @@ void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 
 #endif
 
-void AXD_ItemBase::OnRep_InnerItemCore()
+void AXD_ItemBase::OnRep_OwingItemCore()
 {
-	if (InnerItemCore)
+	if (ItemCore)
 	{
 		//假设ItemCore的Number网络初始化在InnerItemCore前
 		InitItemMesh();
@@ -150,7 +166,7 @@ void AXD_ItemBase::OnRep_InnerItemCore()
 
 int32 AXD_ItemBase::GetNumber() const
 {
-	return InnerItemCore ? InnerItemCore->Number : 0;
+	return ItemCore ? ItemCore->Number : 0;
 }
 
 UPrimitiveComponent* AXD_ItemBase::GetRootMeshComponent() const
@@ -169,32 +185,32 @@ UXD_ItemCoreBase* AXD_ItemBase::CreateItemCoreByType(TSubclassOf<AXD_ItemBase> I
 
 FText AXD_ItemBase::GetItemName() const
 {
-	return InnerItemCore ? InnerItemCore->GetItemName() : FText::GetEmpty();
+	return ItemCore ? ItemCore->GetItemName() : FText::GetEmpty();
 }
 
-class UXD_ItemCoreBase* AXD_ItemBase::GetItemCore_Careful() const
+class UXD_ItemCoreBase* AXD_ItemBase::GetItemCore() const
 {
-	return InnerItemCore;
+	return ItemCore;
 }
 
-const class UXD_ItemCoreBase* AXD_ItemBase::GetItemCore() const
+const class UXD_ItemCoreBase* AXD_ItemBase::GetItemCoreConst() const
 {
-	return InnerItemCore;
+	return ItemCore;
 }
 
 class UXD_ItemCoreBase* AXD_ItemBase::CreateItemCore(UObject* Outer) const
 {
-	return UXD_ItemCoreBase::DeepDuplicateCore(InnerItemCore, Outer);
+	return UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, Outer);
 }
 
 bool AXD_ItemBase::IsEqualWithItem(const AXD_ItemBase* Item) const
 {
-	return this && Item && GetItemCore()->IsEqualWithItemCore(Item->GetItemCore());
+	return this && Item && GetItemCoreConst()->IsEqualWithItemCore(Item->GetItemCoreConst());
 }
 
 bool AXD_ItemBase::IsEqualWithItemCore(const class UXD_ItemCoreBase* CompareItemCore) const
 {
-	return this && InnerItemCore && InnerItemCore->IsEqualWithItemCore(CompareItemCore);
+	return this && ItemCore && ItemCore->IsEqualWithItemCore(CompareItemCore);
 }
 
 AXD_Item_StaticMesh::AXD_Item_StaticMesh(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -205,28 +221,12 @@ AXD_Item_StaticMesh::AXD_Item_StaticMesh(const FObjectInitializer& ObjectInitial
 	SetRootComponent(StaticMeshComponent);
 }
 
-void AXD_Item_StaticMesh::InitItemMesh()
-{
-	TSoftObjectPtr<UObject> StaticMesh = InnerItemCore->IsMergedItem() ? InnerItemCore->ItemMergeMesh : InnerItemCore->ItemMesh;
-	// TODO：异步加载
-	UStaticMesh* ItemMesh = CastChecked<UStaticMesh>(StaticMesh.LoadSynchronous());
-	StaticMeshComponent->SetStaticMesh(ItemMesh);
-}
-
 AXD_Item_SkeletalMesh::AXD_Item_SkeletalMesh(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer)
 {
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(GET_MEMBER_NAME_CHECKED(AXD_Item_SkeletalMesh, SkeletalMeshComponent));
 
 	SetRootComponent(SkeletalMeshComponent);
-}
-
-void AXD_Item_SkeletalMesh::InitItemMesh()
-{	
-	TSoftObjectPtr<UObject> SkeletalMesh = InnerItemCore->IsMergedItem() ? InnerItemCore->ItemMergeMesh : InnerItemCore->ItemMesh;
-	// TODO：异步加载
-	USkeletalMesh* ItemMesh = CastChecked<USkeletalMesh>(SkeletalMesh.LoadSynchronous());
-	SkeletalMeshComponent->SetSkeletalMesh(ItemMesh);
 }
 
 #undef LOCTEXT_NAMESPACE

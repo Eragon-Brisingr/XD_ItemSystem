@@ -62,22 +62,17 @@ bool UXD_ItemCoreFactory::ConfigureProperties()
 	class FXD_ItemCoreFilterViewer : public IClassViewerFilter
 	{
 	public:
-		FXD_ItemCoreFilterViewer()
-		{
-			DisallowedClassFlags = CLASS_Deprecated;
-		}
-
-		TSet<const UClass*> AllowedChildrenOfClasses;
-		EClassFlags DisallowedClassFlags;
+		const EClassFlags DisallowedClassFlags = CLASS_Deprecated;
+		const EClassFlags AllowedClassFlags = CLASS_Abstract;
 
 		virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
 		{
-			return !InClass->HasAnyClassFlags(DisallowedClassFlags) && InClass->IsChildOf<UXD_ItemCoreBase>();
+			return InClass->HasAnyClassFlags(AllowedClassFlags) && !InClass->HasAnyClassFlags(DisallowedClassFlags) && InClass->IsChildOf<UXD_ItemCoreBase>();
 		}
 
 		virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
 		{
-			return !InUnloadedClassData->HasAnyClassFlags(DisallowedClassFlags) && InUnloadedClassData->IsChildOf(UXD_ItemCoreBase::StaticClass());
+			return InUnloadedClassData->HasAnyClassFlags(AllowedClassFlags) && !InUnloadedClassData->HasAnyClassFlags(DisallowedClassFlags) && InUnloadedClassData->IsChildOf(UXD_ItemCoreBase::StaticClass());
 		}
 	};
 

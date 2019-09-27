@@ -20,7 +20,7 @@ class XD_ITEMSYSTEM_API UXD_ItemFunctionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintPure, Category = "背包")
-	static int32 GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item);
+	static int32 GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
 	static int32 GetItemNumberByCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* ItemCore);
@@ -29,7 +29,7 @@ public:
 	static int32 GetItemNumberByType(const TArray<UXD_ItemCoreBase*>& ItemCoreList, TSubclassOf<UXD_ItemCoreBase> ItemClass);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
-	static bool ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* Item);
+	static bool ContainItem(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item);
 
 	UFUNCTION(BlueprintPure, Category = "背包")
 	static bool ContainItemByCore(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const UXD_ItemCoreBase* ItemCore);

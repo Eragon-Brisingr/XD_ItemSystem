@@ -246,7 +246,7 @@ void UXD_InventoryComponentBase::OnRep_ItemList()
 	PreItemCoreList = ItemCoreList;
 }
 
-int32 UXD_InventoryComponentBase::GetItemNumber(UXD_ItemCoreBase* Item) const
+int32 UXD_InventoryComponentBase::GetItemNumber(const AXD_ItemBase* Item) const
 {
 	return UXD_ItemFunctionLibrary::GetItemNumber(ItemCoreList, Item);
 }
@@ -261,7 +261,7 @@ int32 UXD_InventoryComponentBase::GetItemNumberByType(TSubclassOf<UXD_ItemCoreBa
 	return UXD_ItemFunctionLibrary::GetItemNumberByType(ItemCoreList, ItemClass);
 }
 
-bool UXD_InventoryComponentBase::ContainItem(const UXD_ItemCoreBase* Item) const
+bool UXD_InventoryComponentBase::ContainItem(const AXD_ItemBase* Item) const
 {
 	return UXD_ItemFunctionLibrary::ContainItem(ItemCoreList, Item);
 }
