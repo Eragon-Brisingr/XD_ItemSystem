@@ -60,14 +60,14 @@ bool UXD_InventoryComponentBase::ReplicateSubobjects(class UActorChannel *Channe
 	return IsFailed;
 }
 
-void UXD_InventoryComponentBase::WhenGameInit_Implementation()
-{
-	AddItemArray(InitItems);
-}
-
 void UXD_InventoryComponentBase::WhenPostLoad_Implementation()
 {
 	OnRep_ItemList();
+}
+
+void UXD_InventoryComponentBase::WhenGameInit_Implementation()
+{
+	AddItemArray(InitItems);
 }
 
 #if WITH_EDITOR
@@ -219,7 +219,10 @@ void UXD_InventoryComponentBase::AddItemArray(const TArray<UXD_ItemCoreBase*>& I
 {
 	for (UXD_ItemCoreBase* ItemCore : Items)
 	{
-		AddItemCore(ItemCore, ItemCore->Number);
+		if (ItemCore)
+		{
+			AddItemCore(ItemCore, ItemCore->Number);
+		}
 	}
 }
 

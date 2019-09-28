@@ -16,7 +16,7 @@
 
 void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	UObject* Value;
+	UObject* Value = nullptr;
 	PropertyHandle->GetValue(Value);
 
 	bool bShowNumber = Value && PropertyHandle->GetBoolMetaData(TEXT("ConfigUseItem"));
@@ -53,16 +53,20 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 				SNew(STextBlock)
 				.Text_Lambda([=]()
 					{
-						UObject* Value;
-						PropertyHandle->GetValue(Value);
-						FText ItemName;
-						if (UXD_ItemCoreBase* ItemCore = Cast<UXD_ItemCoreBase>(Value))
+						FText ItemName = LOCTEXT("道具为空", "空");
+						UObject* Value = nullptr;
+						FPropertyAccess::Result AccessResult = PropertyHandle->GetValue(Value);
+						switch (AccessResult)
 						{
-							ItemName = ItemCore->GetItemName();
-						}
-						else
-						{
-							ItemName = LOCTEXT("道具为空", "空");
+						case FPropertyAccess::MultipleValues:
+							ItemName = LOCTEXT("选择了多个道具", "多个道具");
+							break;
+						case FPropertyAccess::Success:
+							if (UXD_ItemCoreBase * ItemCore = Cast<UXD_ItemCoreBase>(Value))
+							{
+								ItemName = ItemCore->GetItemName();
+							}
+							break;
 						}
 						return FText::Format(LOCTEXT("道具名Format", "[{0}]"), ItemName);
 					})
@@ -88,13 +92,13 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 							.ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
 							.IsEnabled_Lambda([=]()
 								{
-									UObject* Value;
+									UObject* Value = nullptr;
 									PropertyHandle->GetValue(Value);
 									return Value ? true : false;
 								})
 							.OnClicked_Lambda([=]()
 								{
-									UObject* Value;
+									UObject* Value = nullptr;
 									PropertyHandle->GetValue(Value);
 									if (Value)
 									{
@@ -114,12 +118,16 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 
 					if (bShowNumber)
 					{
-						HorizontalBox->AddSlot()
-							.HAlign(HAlign_Fill)
-							.FillWidth(0.5f)
-							[
-								PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number))->CreatePropertyValueWidget(false)
-							];
+						TSharedPtr<IPropertyHandle> NumberPropertyHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number));
+						if (NumberPropertyHandle.IsValid())
+						{
+							HorizontalBox->AddSlot()
+								.HAlign(HAlign_Fill)
+								.FillWidth(0.5f)
+								[
+									NumberPropertyHandle->CreatePropertyValueWidget(false)
+								];
+						}
 					}
 
 					return HorizontalBox;
@@ -140,7 +148,7 @@ void FXD_ItemCoreCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Pr
 			const TSharedRef<IPropertyHandle> ChildHandle = ItemCoreHandle->GetChildHandle(ChildIndex).ToSharedRef();
 			UProperty* Property = ChildHandle->GetProperty();
 			// EditDefaultOnly的不显示
-			if (!Property->HasAnyPropertyFlags(EPropertyFlags::CPF_DisableEditOnInstance) && !ExcludePropertyNames.Contains(*Property->GetNameCPP()))
+			if (Property && !Property->HasAnyPropertyFlags(EPropertyFlags::CPF_DisableEditOnInstance) && !ExcludePropertyNames.Contains(*Property->GetNameCPP()))
 			{
 				ChildBuilder.AddProperty(ChildHandle);
 			}

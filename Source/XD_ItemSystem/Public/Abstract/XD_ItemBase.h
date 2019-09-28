@@ -64,11 +64,14 @@ public:
 #endif //WITH_EDITOR
 
 public:
-	UPROPERTY(VisibleAnywhere, Instanced, SaveGame, ReplicatedUsing = OnRep_OwingItemCore, Category = "物品", meta = (DisplayName = "物品核心"))
+	UPROPERTY(VisibleAnywhere, Instanced, SaveGame, ReplicatedUsing = OnRep_ItemCore, Category = "物品", meta = (DisplayName = "物品核心"))
 	class UXD_ItemCoreBase* ItemCore;
 
 	UFUNCTION()
-	virtual void OnRep_OwingItemCore();
+	virtual void OnRep_ItemCore();
+	// 网络上即使Actor送达了可能ItemCore还没到，所以要用这个
+	DECLARE_DELEGATE(FOnRepItemCoreNative);
+	FOnRepItemCoreNative OnItemCoreValidNative;
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	int32 GetNumber() const;

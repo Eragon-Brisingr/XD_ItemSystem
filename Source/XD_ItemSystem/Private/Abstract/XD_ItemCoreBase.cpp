@@ -10,6 +10,8 @@
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/SkeletalMesh.h"
+#include "NotificationManager.h"
+#include "SNotificationList.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
 
@@ -51,9 +53,15 @@ void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 	FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number))
 	{
-		if (!CanMergeItem())
+		if (AXD_ItemBase* ItemBase = Cast<AXD_ItemBase>(GetOuter()))
 		{
-			Number = 1;
+			if (!CanMergeItem())
+			{
+				Number = 1;
+				FNotificationInfo NotificationInfo(LOCTEXT("不可合并道具数量改变错误提示", "不可合并的道具，数量不可变"));
+				TSharedPtr<SNotificationItem> NotificationItem = FSlateNotificationManager::Get().AddNotification(NotificationInfo);
+				NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
+			}
 		}
 	}
 }
@@ -86,33 +94,38 @@ AActor* UXD_ItemCoreBase::GetOwner() const
 
 AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
-	if (OuterLevel)
-	{
-		return SpawnItemActorInLevel(OuterLevel, ItemNumber, NAME_None, RF_NoFlags, Location, Rotation, CollisionHandling);
-	}
-	return nullptr;
+	return SpawnItemActorInLevel(OuterLevel, ItemNumber, MakeUniqueObjectName(OuterLevel, GetClass()), RF_NoFlags, Location, Rotation, CollisionHandling);
 }
 
 AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FName& Name /*= NAME_None*/, EObjectFlags InObjectFlags /*= RF_NoFlags*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
-	FActorSpawnParameters ActorSpawnParameters;
-	ActorSpawnParameters.bDeferConstruction = true;
-	ActorSpawnParameters.OverrideLevel = OuterLevel;
-	ActorSpawnParameters.Name = Name;
-	ActorSpawnParameters.ObjectFlags = InObjectFlags;
-	ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
-	if (AXD_ItemBase* SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
+	if (ensure(OuterLevel))
 	{
-		SettingSpawnedItem(SpawnedItem, ItemNumber);
-		SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
-		return SpawnedItem;
+		FActorSpawnParameters ActorSpawnParameters;
+		ActorSpawnParameters.bDeferConstruction = true;
+		ActorSpawnParameters.OverrideLevel = OuterLevel;
+		ActorSpawnParameters.Name = Name;
+		ActorSpawnParameters.ObjectFlags = InObjectFlags;
+		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
+		if (AXD_ItemBase * SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
+		{
+#if WITH_EDITOR
+			if (!ActorSpawnParameters.Name.IsNone())
+			{
+				SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);
+			}
+#endif
+			SettingSpawnedItem(SpawnedItem, ItemNumber);
+			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
+			return SpawnedItem;
+		}
 	}
 	return nullptr;
 }
 
 AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
-	if (Owner)
+	if (ensure(Owner))
 	{
 		FActorSpawnParameters ActorSpawnParameters;
 		ActorSpawnParameters.bDeferConstruction = true;
@@ -120,8 +133,15 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 		ActorSpawnParameters.Instigator = Instigator;
 		ActorSpawnParameters.OverrideLevel = Owner->GetLevel();
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
+		ActorSpawnParameters.Name = MakeUniqueObjectName(Owner->GetLevel(), GetClass());
 		if (AXD_ItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
 		{
+#if WITH_EDITOR
+			if (!ActorSpawnParameters.Name.IsNone())
+			{
+				SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);
+			}
+#endif
 			SettingSpawnedItem(SpawnedItem, ItemNumber);
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
 			return SpawnedItem;

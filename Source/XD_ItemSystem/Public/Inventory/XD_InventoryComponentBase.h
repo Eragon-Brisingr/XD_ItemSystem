@@ -22,26 +22,26 @@ public:
 
 protected:
 	// Called when the game starts
-	virtual void BeginPlay() override;
+	void BeginPlay() override;
 
 public:
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > & OutLifetimeProps) const override;
+	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > & OutLifetimeProps) const override;
 
-	virtual bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
+	bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
 	//IXD_SaveGameInterface
-	virtual void WhenGameInit_Implementation() override;
-	virtual void WhenPostLoad_Implementation() override;
+	void WhenPostLoad_Implementation() override;	
+	void WhenGameInit_Implementation() override;
 	//IXD_SaveGameInterface
 
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-	UPROPERTY(EditAnywhere, Category = "配置|常用", meta = (DisplayName = "初始道具", ConfigUseItem = true), Instanced)
+	UPROPERTY(EditAnywhere, Category = "背包|配置", meta = (DisplayName = "初始道具", ConfigUseItem = true), Instanced)
 	TArray<UXD_ItemCoreBase*> InitItems;
 
 //回调事件
