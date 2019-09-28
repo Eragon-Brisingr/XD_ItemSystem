@@ -5,7 +5,7 @@
 #include "XD_ItemBase.h"
 #include "XD_ItemCoreBase.h"
 #include "AssetData.h"
-#include "Engine/Blueprint.h"
+#include "XD_ItemCoreBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemActorFactory" 
 
@@ -22,7 +22,7 @@ bool UXD_ItemActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText
 	if (AssetData.IsValid())
 	{
 		UObject* AssetClass = AssetData.GetAsset();
-		if (UBlueprint* Blueprint = Cast<UBlueprint>(AssetClass))
+		if (UXD_ItemCoreBlueprint* Blueprint = Cast<UXD_ItemCoreBlueprint>(AssetClass))
 		{
 			// TODO：资源有效性检查
 			if (Blueprint->GeneratedClass->IsChildOf<UXD_ItemCoreBase>())
@@ -37,11 +37,14 @@ bool UXD_ItemActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText
 
 AActor* UXD_ItemActorFactory::SpawnActor(UObject* Asset, ULevel* InLevel, const FTransform& Transform, EObjectFlags InObjectFlags, const FName Name)
 {
-	UBlueprint* ItemBlueprint = CastChecked<UBlueprint>(Asset);
-	TSubclassOf<UXD_ItemCoreBase> ItemClass = CastChecked<UClass>(ItemBlueprint->GeneratedClass);
-	UXD_ItemCoreBase* ItemCore = CastChecked<UXD_ItemCoreBase>(ItemClass.GetDefaultObject());
-	AXD_ItemBase* Item = ItemCore->SpawnItemActorInLevel(InLevel, ItemCore->Number, Name, InObjectFlags, Transform.GetLocation(), Transform.GetRotation().Rotator(), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	return Item;
+	if (UXD_ItemCoreBlueprint* ItemBlueprint = Cast<UXD_ItemCoreBlueprint>(Asset))
+	{
+		TSubclassOf<UXD_ItemCoreBase> ItemClass = CastChecked<UClass>(ItemBlueprint->GeneratedClass);
+		UXD_ItemCoreBase* ItemCore = CastChecked<UXD_ItemCoreBase>(ItemClass.GetDefaultObject());
+		AXD_ItemBase* Item = ItemCore->SpawnItemActorInLevel(InLevel, ItemCore->Number, Name, InObjectFlags, Transform.GetLocation(), Transform.GetRotation().Rotator(), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		return Item;
+	}
+	return nullptr;
 }
 
 void UXD_ItemActorFactory::PostSpawnActor(UObject* Asset, AActor* NewActor)

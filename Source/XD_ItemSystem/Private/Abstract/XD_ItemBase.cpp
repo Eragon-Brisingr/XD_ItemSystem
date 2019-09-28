@@ -58,6 +58,29 @@ bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutB
 	return IsFailed;
 }
 
+void AXD_ItemBase::PostInitProperties()
+{
+	Super::PostInitProperties();
+	
+	// 数据有效性修复
+	if (ItemCore)
+	{
+		if (ItemCore->CanMergeItem())
+		{
+			ensure(ItemCore->Number == 1 || ItemCore->Number >= ItemCore->MinItemMergeNumber);
+			if (ItemCore->Number < ItemCore->MinItemMergeNumber)
+			{
+				ItemCore->Number = 1;
+			}
+		}
+		else
+		{
+			ensure(ItemCore->Number == 1);
+			ItemCore->Number = 1;
+		}
+	}
+}
+
 void AXD_ItemBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();

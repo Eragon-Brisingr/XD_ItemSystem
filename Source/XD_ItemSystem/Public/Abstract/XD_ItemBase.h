@@ -28,13 +28,10 @@ public:
 	void Tick(float DeltaTime) override;
 
 	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > & OutLifetimeProps) const override;
-
 	bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
-
+	void PostInitProperties() override;
 	void PostInitializeComponents() override;
-
 	void OnConstruction(const FTransform& Transform) override;
-	
 public:
 	//ISaveGameInterface
 	void WhenPostLoad_Implementation() override;

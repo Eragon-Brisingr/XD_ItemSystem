@@ -62,6 +62,13 @@ void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 				TSharedPtr<SNotificationItem> NotificationItem = FSlateNotificationManager::Get().AddNotification(NotificationInfo);
 				NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
 			}
+			else if (Number < MinItemMergeNumber && Number != 1)
+			{
+				Number = 1;
+				FNotificationInfo NotificationInfo(LOCTEXT("道具数量小于最小合并数量提示", "道具数量小于最小合并数量"));
+				TSharedPtr<SNotificationItem> NotificationItem = FSlateNotificationManager::Get().AddNotification(NotificationInfo);
+				NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
+			}
 		}
 	}
 }
