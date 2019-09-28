@@ -155,12 +155,13 @@ void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 
 #endif
 
-void AXD_ItemBase::OnRep_OwingItemCore()
+void AXD_ItemBase::OnRep_ItemCore()
 {
 	if (ItemCore)
 	{
 		//假设ItemCore的Number网络初始化在InnerItemCore前
 		InitItemMesh();
+		OnItemCoreValidNative.ExecuteIfBound();
 	}
 }
 
