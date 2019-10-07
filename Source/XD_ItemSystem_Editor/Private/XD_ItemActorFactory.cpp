@@ -42,6 +42,7 @@ AActor* UXD_ItemActorFactory::SpawnActor(UObject* Asset, ULevel* InLevel, const 
 		TSubclassOf<UXD_ItemCoreBase> ItemClass = CastChecked<UClass>(ItemBlueprint->GeneratedClass);
 		UXD_ItemCoreBase* ItemCore = CastChecked<UXD_ItemCoreBase>(ItemClass.GetDefaultObject());
 		AXD_ItemBase* Item = ItemCore->SpawnItemActorInLevel(InLevel, ItemCore->Number, Name, InObjectFlags, Transform.GetLocation(), Transform.GetRotation().Rotator(), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		Item->WhenItemInWorldSetting();
 		return Item;
 	}
 	return nullptr;

@@ -85,7 +85,6 @@ void AXD_ItemBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	//在PostInitProperties后才执行WhenItemInWorldSetting，防止[Attempting to move a fully simulated skeletal mesh]的警告
 	WhenItemInWorldSetting();
 }
 
