@@ -35,11 +35,6 @@ FText UXD_ItemCoreFactory::GetToolTip() const
 	return LOCTEXT("创造新道具", "创造新道具");
 }
 
-uint32 UXD_ItemCoreFactory::GetMenuCategories() const
-{
-	return EAssetTypeCategories::Blueprint;
-}
-
 UObject* UXD_ItemCoreFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
 // 	UClass* BlueprintClass = nullptr;

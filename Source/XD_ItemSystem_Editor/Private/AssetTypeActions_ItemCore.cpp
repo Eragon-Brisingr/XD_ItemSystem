@@ -145,7 +145,7 @@ FColor FAssetTypeActions_ItemCore::GetTypeColor() const
 
 uint32 FAssetTypeActions_ItemCore::GetCategories()
 {
-	return EAssetTypeCategories::Blueprint;
+	return EAssetTypeCategories::Gameplay;
 }
 
 class UThumbnailInfo* FAssetTypeActions_ItemCore::GetThumbnailInfo(UObject* Asset) const
