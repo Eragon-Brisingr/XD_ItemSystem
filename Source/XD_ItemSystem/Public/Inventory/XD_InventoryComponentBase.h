@@ -47,19 +47,19 @@ public:
 //回调事件
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAddItem, UXD_ItemCoreBase*, ItemCore, int32, AddNumber, int32, ExistNumber);
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
+	UPROPERTY(BlueprintAssignable, Category = "背包")
 	FOnAddItem OnAddItem;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnRemoveItem, UXD_ItemCoreBase*, ItemCore, int32, RemoveNumber, int32, ExistNumber);
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
+	UPROPERTY(BlueprintAssignable, Category = "背包")
 	FOnRemoveItem OnRemoveItem;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnGetItemFromOther, AActor*, Instigator, UXD_ItemCoreBase*, ItemCore, int32, ItemNumber, bool, IsBuy);
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
+	UPROPERTY(BlueprintAssignable, Category = "背包")
 	FOnGetItemFromOther OnGetItemFromOther;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnRemoveItemByOther, AActor*, Instigator, UXD_ItemCoreBase*, ItemCore, int32, ItemNumber, bool, IsBuy);
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "背包")
+	UPROPERTY(BlueprintAssignable, Category = "背包")
 	FOnRemoveItemByOther OnRemoveItemByOther;
 
 	UPROPERTY()
