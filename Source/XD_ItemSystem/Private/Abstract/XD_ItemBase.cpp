@@ -1,15 +1,16 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "XD_ItemBase.h"
-#include "XD_ItemCoreBase.h"
-#include "XD_ObjectFunctionLibrary.h"
+#include <Engine/World.h>
 #include <UnrealNetwork.h>
 #include <Engine/ActorChannel.h>
+#include <Components/StaticMeshComponent.h>
+#include <Components/SkeletalMeshComponent.h>
+
+#include "XD_ItemCoreBase.h"
+#include "XD_ObjectFunctionLibrary.h"
 #include "XD_ActorFunctionLibrary.h"
 #include "XD_ItemSystemUtility.h"
-#include "Engine/World.h"
-#include "Components/StaticMeshComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
 
@@ -43,7 +44,6 @@ void AXD_ItemBase::GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(AXD_ItemBase, ItemCore, COND_InitialOnly);
-	DOREPLIFETIME(AXD_ItemBase, bItemSimulatePhysics);
 }
 
 bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags)
@@ -121,10 +121,9 @@ void AXD_ItemBase::WhenItemInWorldSetting()
 {
 	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(GetRootComponent()))
 	{
-		if (GetAttachParentActor() == nullptr)
-		{
-			SetItemSimulatePhysics(true);
-		}
+		AActor* AttachedParent = GetAttachParentActor();
+		SetItemSimulatePhysics(AttachedParent == nullptr ? true : false);
+
 		SetItemCollisionProfileName(GetDefault<UXD_ItemSystemSettings>()->ItemCollisionProfileName);
 		Root->BodyInstance.bUseCCD = true;
 		Root->SetCanEverAffectNavigation(false);
@@ -142,16 +141,17 @@ void AXD_ItemBase::SetItemCollisionProfileName(const FName& CollisionProfileName
 
 void AXD_ItemBase::SetItemSimulatePhysics(bool bSimulate)
 {
-	bItemSimulatePhysics = bSimulate;
-	OnRep_ItemSimulatePhysics();
+	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(GetRootComponent()))
+	{
+		Root->SetSimulatePhysics(bSimulate);
+	}
 }
 
-void AXD_ItemBase::OnRep_ItemSimulatePhysics()
+void AXD_ItemBase::OnRep_AttachmentReplication()
 {
-	if (UPrimitiveComponent* Root = Cast<UPrimitiveComponent>(RootComponent))
-	{
-		Root->SetSimulatePhysics(bItemSimulatePhysics);
-	}
+	Super::OnRep_AttachmentReplication();
+
+	SetItemSimulatePhysics(GetAttachmentReplication().AttachParent == nullptr ? true : false);
 }
 
 #if WITH_EDITOR

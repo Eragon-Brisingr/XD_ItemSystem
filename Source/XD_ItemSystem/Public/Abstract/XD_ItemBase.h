@@ -51,10 +51,7 @@ public:
 
 	virtual void SetItemSimulatePhysics(bool bSimulate);
 
-	UPROPERTY(ReplicatedUsing = "OnRep_ItemSimulatePhysics")
-	uint8 bItemSimulatePhysics : 1;
-	UFUNCTION()
-	void OnRep_ItemSimulatePhysics();
+	void OnRep_AttachmentReplication() override;
 public:
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
