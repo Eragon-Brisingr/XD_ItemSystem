@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "XD_ItemActorFactory.h"
@@ -24,7 +24,7 @@ bool UXD_ItemActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText
 		UObject* AssetClass = AssetData.GetAsset();
 		if (UXD_ItemCoreBlueprint* Blueprint = Cast<UXD_ItemCoreBlueprint>(AssetClass))
 		{
-			// TODO£º×ÊÔ´ÓÐÐ§ÐÔ¼ì²é
+			// TODOï¼šèµ„æºæœ‰æ•ˆæ€§æ£€æŸ¥
 			if (Blueprint->GeneratedClass->IsChildOf<UXD_ItemCoreBase>())
 			{
 				//OutErrorMsg = LOCTEXT("CanCreateActorFrom_NoTileMap", "No tile map was specified.");
