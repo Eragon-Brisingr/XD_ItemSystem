@@ -17,7 +17,7 @@ UXD_InventoryComponentBase::UXD_InventoryComponentBase()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 }
 
 
