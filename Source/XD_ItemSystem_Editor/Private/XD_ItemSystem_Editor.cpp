@@ -1,16 +1,16 @@
 ﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "XD_ItemSystem_Editor.h"
-#include <ModuleManager.h>
+#include <Modules/ModuleManager.h>
 #include <PropertyEditorModule.h>
 #include "XD_PropertyCustomizationEx.h"
 #include "XD_Item_Customization.h"
-#include "Editor.h"
+#include <Editor.h>
 #include "XD_ItemActorFactory.h"
-#include "AssetToolsModule.h"
+#include <AssetToolsModule.h>
 #include "AssetTypeActions_ItemCore.h"
-#include "XD_ItemCoreBase.h"
-#include "XD_ItemCoreBlueprint.h"
+#include "Abstract/XD_ItemCoreBase.h"
+#include "Bluprint/XD_ItemCoreBlueprint.h"
 
 struct FXD_Item;
 

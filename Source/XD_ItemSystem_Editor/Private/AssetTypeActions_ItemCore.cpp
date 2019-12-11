@@ -2,10 +2,11 @@
 
 
 #include "AssetTypeActions_ItemCore.h"
-#include "XD_ItemCoreBase.h"
-#include "ThumbnailHelpers.h"
-#include "XD_ItemCoreBlueprint.h"
-#include "ThumbnailRendering/SceneThumbnailInfo.h"
+#include <ThumbnailHelpers.h>
+#include <ThumbnailRendering/SceneThumbnailInfo.h>
+
+#include "Abstract/XD_ItemCoreBase.h"
+#include "Bluprint/XD_ItemCoreBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "FXD_AutoGenSequencer_EditorModule"
 

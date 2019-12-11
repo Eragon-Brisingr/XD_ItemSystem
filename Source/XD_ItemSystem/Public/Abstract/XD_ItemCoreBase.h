@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include <Engine/EngineTypes.h>
-#include "UObject/NoExportTypes.h"
+#include <UObject/NoExportTypes.h>
 #include "XD_ItemCoreBase.generated.h"
 
 class AXD_ItemBase;

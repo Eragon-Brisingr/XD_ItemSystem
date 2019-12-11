@@ -3,14 +3,15 @@
 #include "XD_Item_Customization.h"
 #include <DetailWidgetRow.h>
 #include <IDetailChildrenBuilder.h>
-#include "XD_ItemCoreBase.h"
+#include <Widgets/Input/SButton.h>
+#include <Editor.h>
+#include <Widgets/Images/SImage.h>
+#include <Widgets/Text/STextBlock.h>
+#include <PropertyCustomizationHelpers.h>
+
 #include "XD_PropertyCustomizationEx.h"
-#include "PropertyCustomizationHelpers.h"
-#include "XD_InventoryComponentBase.h"
-#include "SButton.h"
-#include "Editor.h"
-#include "SImage.h"
-#include "STextBlock.h"
+#include "Abstract/XD_ItemCoreBase.h"
+#include "Inventory/XD_InventoryComponentBase.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemCore类型自定义面板控件"
 

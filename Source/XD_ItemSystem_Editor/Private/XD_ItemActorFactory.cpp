@@ -2,10 +2,10 @@
 
 
 #include "XD_ItemActorFactory.h"
-#include "XD_ItemBase.h"
-#include "XD_ItemCoreBase.h"
+#include "Abstract/XD_ItemBase.h"
+#include "Abstract/XD_ItemCoreBase.h"
 #include "AssetData.h"
-#include "XD_ItemCoreBlueprint.h"
+#include "Bluprint/XD_ItemCoreBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemActorFactory" 
 

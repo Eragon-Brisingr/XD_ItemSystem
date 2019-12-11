@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "UnrealTypeTraits.h"
 #include "XD_TemplateLibrary.h"
 #include "XD_ItemFunctionLibrary.generated.h"
 

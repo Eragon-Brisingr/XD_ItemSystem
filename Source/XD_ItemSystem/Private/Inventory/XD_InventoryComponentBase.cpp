@@ -1,11 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "XD_InventoryComponentBase.h"
-#include "XD_ItemCoreBase.h"
+#include "Inventory/XD_InventoryComponentBase.h"
+#include "Abstract/XD_ItemCoreBase.h"
 #include "XD_ObjectFunctionLibrary.h"
 #include <Kismet/KismetSystemLibrary.h>
-#include "XD_ItemBase.h"
-#include "UnrealNetwork.h"
+#include "Abstract/XD_ItemBase.h"
+#include <Net/UnrealNetwork.h>
 #include "Utils/XD_ItemFunctionLibrary.h"
 
 

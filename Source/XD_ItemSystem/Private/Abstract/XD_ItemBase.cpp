@@ -1,13 +1,13 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "XD_ItemBase.h"
+#include "Abstract/XD_ItemBase.h"
 #include <Engine/World.h>
-#include <UnrealNetwork.h>
+#include <Net/UnrealNetwork.h>
 #include <Engine/ActorChannel.h>
 #include <Components/StaticMeshComponent.h>
 #include <Components/SkeletalMeshComponent.h>
 
-#include "XD_ItemCoreBase.h"
+#include "Abstract/XD_ItemCoreBase.h"
 #include "XD_ObjectFunctionLibrary.h"
 #include "XD_ActorFunctionLibrary.h"
 #include "XD_ItemSystemUtility.h"

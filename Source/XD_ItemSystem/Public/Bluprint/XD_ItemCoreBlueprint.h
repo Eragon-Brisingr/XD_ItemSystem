@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/Blueprint.h"
+#include <Engine/Blueprint.h>
 #include "XD_ItemCoreBlueprint.generated.h"
 
 /**

@@ -1,9 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "XD_ItemFunctionLibrary.h"
-#include "XD_ItemBase.h"
-#include "XD_ItemCoreBase.h"
+#include "Utils/XD_ItemFunctionLibrary.h"
+#include "Abstract/XD_ItemBase.h"
+#include "Abstract/XD_ItemCoreBase.h"
 
 int32 UXD_ItemFunctionLibrary::GetItemNumber(const TArray<UXD_ItemCoreBase*>& ItemCoreList, const AXD_ItemBase* Item)
 {

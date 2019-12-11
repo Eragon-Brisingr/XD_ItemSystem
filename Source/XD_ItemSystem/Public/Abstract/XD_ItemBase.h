@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include <GameFramework/Actor.h>
 #include "XD_SaveGameInterface.h"
 #include <GameplayTagContainer.h>
 #include "XD_ItemBase.generated.h"

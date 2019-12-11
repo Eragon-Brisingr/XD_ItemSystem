@@ -1,17 +1,18 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "XD_ItemCoreBase.h"
-#include "XD_ItemBase.h"
-#include "XD_InventoryComponentBase.h"
+#include "Abstract/XD_ItemCoreBase.h"
+#include "Abstract/XD_ItemBase.h"
+#include <Net/UnrealNetwork.h>
+#include <Engine/World.h>
+#include <Engine/BlueprintGeneratedClass.h>
+#include <Engine/StaticMesh.h>
+#include <Engine/SkeletalMesh.h>
+#include <Framework/Notifications/NotificationManager.h>
+#include <Widgets/Notifications/SNotificationList.h>
+
+#include "Inventory/XD_InventoryComponentBase.h"
 #include "XD_ObjectFunctionLibrary.h"
-#include <UnrealNetwork.h>
 #include "XD_ItemSystemUtility.h"
-#include "Engine/World.h"
-#include "Engine/BlueprintGeneratedClass.h"
-#include "Engine/StaticMesh.h"
-#include "Engine/SkeletalMesh.h"
-#include "NotificationManager.h"
-#include "SNotificationList.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
 

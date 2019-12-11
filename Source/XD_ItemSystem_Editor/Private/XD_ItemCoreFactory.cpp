@@ -1,16 +1,16 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "XD_ItemCoreFactory.h"
-#include "KismetEditorUtilities.h"
-#include "KismetCompilerModule.h"
-#include "ModuleManager.h"
-#include "ClassViewerModule.h"
-#include "SClassPickerDialog.h"
-#include "XD_ItemCoreBase.h"
-#include "AssetTypeCategories.h"
-#include "ClassViewerFilter.h"
-#include "XD_ItemCoreBlueprint.h"
-#include "XD_ItemCoreGenerateClass.h"
+#include <Kismet2/KismetEditorUtilities.h>
+#include <KismetCompilerModule.h>
+#include <Modules/ModuleManager.h>
+#include <ClassViewerModule.h>
+#include <Kismet2/SClassPickerDialog.h>
+#include "Abstract/XD_ItemCoreBase.h"
+#include <AssetTypeCategories.h>
+#include <ClassViewerFilter.h>
+#include "Bluprint/XD_ItemCoreBlueprint.h"
+#include "Bluprint/XD_ItemCoreGenerateClass.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemCoreFactory"
 
