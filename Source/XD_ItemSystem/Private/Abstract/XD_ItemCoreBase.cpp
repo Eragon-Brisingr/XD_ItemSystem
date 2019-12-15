@@ -16,6 +16,10 @@
 
 #define LOCTEXT_NAMESPACE "物品" 
 
+#if WITH_EDITOR
+uint8 FSpawnPreviewItemScope::Counter;
+#endif
+
 UXD_ItemCoreBase::UXD_ItemCoreBase(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
 	: Super(ObjectInitializer), 
 	ItemName(LOCTEXT("物品", "物品")),
@@ -115,6 +119,13 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 
 		ActorSpawnParameters.Name = Name;
 		ActorSpawnParameters.ObjectFlags = InObjectFlags;
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
+#if WITH_EDITOR
+		if (FSpawnPreviewItemScope::IsSpawnPreviewItem())
+		{
+			ActorSpawnParameters.ObjectFlags |= RF_Transient;
+			ActorSpawnParameters.bHideFromSceneOutliner = true;
+		}
+#endif
 		if (AXD_ItemBase * SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
 		{
 #if WITH_EDITOR
@@ -142,6 +153,13 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 		ActorSpawnParameters.OverrideLevel = Owner->GetLevel();
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
 		ActorSpawnParameters.Name = MakeUniqueObjectName(Owner->GetLevel(), GetClass());
+#if WITH_EDITOR
+		if (FSpawnPreviewItemScope::IsSpawnPreviewItem())
+		{
+			ActorSpawnParameters.ObjectFlags |= RF_Transient;
+			ActorSpawnParameters.bHideFromSceneOutliner = true;
+		}
+#endif
 		if (AXD_ItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
 		{
 #if WITH_EDITOR

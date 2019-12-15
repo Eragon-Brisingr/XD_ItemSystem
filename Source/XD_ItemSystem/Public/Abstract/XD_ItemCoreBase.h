@@ -14,6 +14,17 @@ class UMaterialInterface;
 /**
  * 
  */
+#if WITH_EDITOR
+// 用次作用域生成的道具实例是不会被保存、且编辑器的层级窗不可见
+struct XD_ITEMSYSTEM_API FSpawnPreviewItemScope
+{
+	FSpawnPreviewItemScope() { Counter += 1; }
+	~FSpawnPreviewItemScope() { Counter -= 1; }
+	static bool IsSpawnPreviewItem() { return Counter != 0; }
+private:
+	static uint8 Counter;
+};
+#endif
 
 UCLASS(abstract, BlueprintType, EditInlineNew)
 class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
