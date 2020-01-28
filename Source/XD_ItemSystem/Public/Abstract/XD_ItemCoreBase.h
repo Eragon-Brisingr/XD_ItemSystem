@@ -35,17 +35,14 @@ public:
 	UXD_ItemCoreBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	bool IsSupportedForNetworking() const override;
-
 	void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
-	void PostInitProperties() override;
+	UWorld* GetWorld() const override;
 
 #if WITH_EDITOR
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 public:
-	// TODO：需要删除
-	UPROPERTY(BlueprintReadOnly, Category = "物品")
+	UPROPERTY(Transient)
 	UXD_InventoryComponentBase* OwingInventory;
 	
 	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名"))
@@ -78,9 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	bool IsMergedItem() const { return CanMergeItem() && Number >= MinItemMergeNumber; }
 	TSoftObjectPtr<UObject> GetCurrentItemModel() const;
-public:
-	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	AActor* GetOwner() const;
+
 	//生成实体
 public:
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))

@@ -45,9 +45,15 @@ void UXD_ItemCoreBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	DOREPLIFETIME(UXD_ItemCoreBase, Number);
 }
 
-void UXD_ItemCoreBase::PostInitProperties()
+UWorld* UXD_ItemCoreBase::GetWorld() const
 {
-	Super::PostInitProperties();
+#if WITH_EDITOR
+	if (HasAnyFlags(RF_ClassDefaultObject))
+	{
+		return nullptr;
+	}
+#endif
+	return GetOuter()->GetWorld();
 }
 
 #if WITH_EDITOR
@@ -97,11 +103,6 @@ void UXD_ItemCoreBase::OnRep_Number(int32 PreNumber)
 TSoftObjectPtr<UObject> UXD_ItemCoreBase::GetCurrentItemModel() const
 {
 	return IsMergedItem() ? ItemMergeMesh : ItemMesh;
-}
-
-AActor* UXD_ItemCoreBase::GetOwner() const
-{
-	return OwingInventory ? OwingInventory->GetOwner() : nullptr;
 }
 
 AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
