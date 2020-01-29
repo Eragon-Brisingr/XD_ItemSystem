@@ -149,9 +149,9 @@ void AXD_ItemBase::SetItemSimulatePhysics(bool bSimulate)
 
 void AXD_ItemBase::OnRep_AttachmentReplication()
 {
-	Super::OnRep_AttachmentReplication();
-
 	SetItemSimulatePhysics(GetAttachmentReplication().AttachParent == nullptr ? true : false);
+
+	Super::OnRep_AttachmentReplication();
 }
 
 #if WITH_EDITOR
