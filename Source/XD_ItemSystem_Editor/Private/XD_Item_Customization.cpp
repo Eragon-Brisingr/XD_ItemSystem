@@ -18,7 +18,7 @@
 void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	UObject* Value = nullptr;
-	PropertyHandle->GetValue(Value);
+	FPropertyAccess::Result AccessResult = PropertyHandle->GetValue(Value);
 
 	bool bShowNumber = Value && PropertyHandle->GetBoolMetaData(TEXT("ConfigUseItem"));
 	if (!bShowNumber)
@@ -79,6 +79,11 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 		[
 			([&]()->TSharedRef<SWidget>
 				{
+					if (AccessResult == FPropertyAccess::MultipleValues)
+					{
+						return SNew(STextBlock).Text(LOCTEXT("无法编辑多个道具", "无法编辑多个道具"));
+					}
+
 					TSharedRef<SHorizontalBox> HorizontalBox = SNew(SHorizontalBox)
 						+ SHorizontalBox::Slot()
 						.HAlign(HAlign_Fill)
@@ -139,8 +144,8 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 void FXD_ItemCoreCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	UObject* Value;
-	PropertyHandle->GetValue(Value);
-	if (Value)
+	FPropertyAccess::Result Access = PropertyHandle->GetValue(Value);
+	if (Access != FPropertyAccess::MultipleValues && Value)
 	{
 		TArray<FName> ExcludePropertyNames { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) };
 		TSharedRef<IPropertyHandle> ItemCoreHandle = PropertyHandle->GetChildHandle(0).ToSharedRef();
