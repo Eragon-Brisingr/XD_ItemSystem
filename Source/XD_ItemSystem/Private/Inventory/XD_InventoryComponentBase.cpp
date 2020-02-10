@@ -1,12 +1,14 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Inventory/XD_InventoryComponentBase.h"
-#include "Abstract/XD_ItemCoreBase.h"
-#include "XD_ObjectFunctionLibrary.h"
-#include <Kismet/KismetSystemLibrary.h>
-#include "Abstract/XD_ItemBase.h"
+#include <Engine/ActorChannel.h>
 #include <Net/UnrealNetwork.h>
+#include <Kismet/KismetSystemLibrary.h>
+
+#include "XD_ObjectFunctionLibrary.h"
 #include "Utils/XD_ItemFunctionLibrary.h"
+#include "Abstract/XD_ItemBase.h"
+#include "Abstract/XD_ItemCoreBase.h"
 
 
 // Sets default values for this component's properties
@@ -79,40 +81,7 @@ void UXD_InventoryComponentBase::PostEditChangeProperty(FPropertyChangedEvent& P
 
 TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCore(const UXD_ItemCoreBase* ItemCore, int32 Number /*= 1*/)
 {
-	if (!ItemCore || Number <= 0)
-		return {};
-
-	if (ItemCore->CanCompositeInInventory())
-	{
-		int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](UXD_ItemCoreBase* ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
-		if (ItemIndex != INDEX_NONE)
-		{
-			UXD_ItemCoreBase* NeedAddItemCore = ItemCoreList[ItemIndex];
-			int32 PreNumber = NeedAddItemCore->Number;
-			NeedAddItemCore->Number += Number;
-			NeedAddItemCore->OnRep_Number(PreNumber);
-			return { NeedAddItemCore };
-		}
-		else
-		{
-			UXD_ItemCoreBase* NewItemCore = UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, this);
-			NewItemCore->Number = Number;
-			ItemCoreList.Add(NewItemCore);
-			OnRep_ItemList();
-			return { NewItemCore };
-		}
-	}
-
-	TArray<UXD_ItemCoreBase*> Res;
-	for (int i = 0; i < Number; ++i)
-	{
-		UXD_ItemCoreBase* NewItemCore = UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, this);
-		Res.Add(NewItemCore);
-		NewItemCore->Number = 1;
-		ItemCoreList.Add(NewItemCore);
-	}
-	OnRep_ItemList();
-	return Res;
+	return AddItemCoreInner(ItemCore, Number, true);
 }
 
 template<typename TPredicate>
@@ -215,15 +184,60 @@ void UXD_InventoryComponentBase::ClearItem()
 	OnRep_ItemList();
 }
 
+TArray<UXD_ItemCoreBase*> UXD_InventoryComponentBase::AddItemCoreInner(const UXD_ItemCoreBase* ItemCore, int32 Number, const bool NotifyUpdate)
+{
+	if (!ItemCore || Number <= 0)
+		return {};
+
+	if (ItemCore->CanCompositeInInventory())
+	{
+		int32 ItemIndex = ItemCoreList.IndexOfByPredicate([ItemCore](UXD_ItemCoreBase* ElementItem) {return ElementItem->IsEqualWithItemCore(ItemCore); });
+		if (ItemIndex != INDEX_NONE)
+		{
+			UXD_ItemCoreBase* NeedAddItemCore = ItemCoreList[ItemIndex];
+			int32 PreNumber = NeedAddItemCore->Number;
+			NeedAddItemCore->Number += Number;
+			NeedAddItemCore->OnRep_Number(PreNumber);
+			return { NeedAddItemCore };
+		}
+		else
+		{
+			UXD_ItemCoreBase* NewItemCore = UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, this);
+			NewItemCore->Number = Number;
+			ItemCoreList.Add(NewItemCore);
+			if (NotifyUpdate)
+			{
+				OnRep_ItemList();
+			}
+			return { NewItemCore };
+		}
+	}
+
+	TArray<UXD_ItemCoreBase*> Res;
+	for (int i = 0; i < Number; ++i)
+	{
+		UXD_ItemCoreBase* NewItemCore = UXD_ItemCoreBase::DeepDuplicateCore(ItemCore, this);
+		Res.Add(NewItemCore);
+		NewItemCore->Number = 1;
+		ItemCoreList.Add(NewItemCore);
+	}			
+	if (NotifyUpdate)
+	{
+		OnRep_ItemList();
+	}
+	return Res;
+}
+
 void UXD_InventoryComponentBase::AddItemArray(const TArray<UXD_ItemCoreBase*>& Items)
 {
 	for (UXD_ItemCoreBase* ItemCore : Items)
 	{
 		if (ItemCore)
 		{
-			AddItemCore(ItemCore, ItemCore->Number);
+			AddItemCoreInner(ItemCore, ItemCore->Number, false);
 		}
 	}
+	OnRep_ItemList();
 }
 
 void UXD_InventoryComponentBase::OnRep_ItemList()

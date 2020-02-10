@@ -98,6 +98,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	void ClearItem();
 	
+protected:
+	TArray<UXD_ItemCoreBase*> AddItemCoreInner(const UXD_ItemCoreBase* ItemCore, int32 Number, const bool NotifyUpdate);
+
 	// 功能函数
 public:
 	UFUNCTION(BlueprintCallable, Category = "背包")
