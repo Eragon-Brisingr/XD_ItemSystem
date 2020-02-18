@@ -15,7 +15,7 @@ class UMaterialInterface;
  * 
  */
 #if WITH_EDITOR
-// 用次作用域生成的道具实例是不会被保存、且编辑器的层级窗不可见
+// 用此作用域生成的道具实例是不会被保存、且编辑器的层级窗不可见
 struct XD_ITEMSYSTEM_API FSpawnPreviewItemScope
 {
 	FSpawnPreviewItemScope() { Counter += 1; }

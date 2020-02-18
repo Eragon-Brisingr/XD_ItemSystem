@@ -164,10 +164,7 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 		if (AXD_ItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
 		{
 #if WITH_EDITOR
-			if (!ActorSpawnParameters.Name.IsNone())
-			{
-				SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);
-			}
+			SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);
 #endif
 			SettingSpawnedItem(SpawnedItem, ItemNumber);
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
