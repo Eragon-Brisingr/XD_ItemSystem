@@ -16,7 +16,7 @@ UItemCore_ThumbnailRenderer::UItemCore_ThumbnailRenderer(const FObjectInitialize
 
 }
 
-void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* RenderTarget, FCanvas* Canvas)
+void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
 	UXD_ItemCoreBlueprint* ItemCoreBlueprint = Cast<UXD_ItemCoreBlueprint>(Object);
 	if (ItemCoreBlueprint == nullptr || ItemCoreBlueprint->GeneratedClass == nullptr)
@@ -51,7 +51,7 @@ void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 		StaticMeshThumbnailScene->SetStaticMesh(StaticMesh);
 		StaticMeshThumbnailScene->GetScene()->UpdateSpeedTreeWind(0.0);
 
-		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(RenderTarget, StaticMeshThumbnailScene->GetScene(), FEngineShowFlags(ESFIM_Game))
+		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(Viewport, StaticMeshThumbnailScene->GetScene(), FEngineShowFlags(ESFIM_Game))
 			.SetWorldTimes(FApp::GetCurrentTime() - GStartTime, FApp::GetDeltaTime(), FApp::GetCurrentTime() - GStartTime));
 
 		ViewFamily.EngineShowFlags.DisableAdvancedFeatures();
@@ -70,7 +70,7 @@ void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 		}
 
 		SkeletalMeshThumbnailScene->SetSkeletalMesh(SkeletalMesh);
-		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(RenderTarget, SkeletalMeshThumbnailScene->GetScene(), FEngineShowFlags(ESFIM_Game))
+		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(Viewport, SkeletalMeshThumbnailScene->GetScene(), FEngineShowFlags(ESFIM_Game))
 			.SetWorldTimes(FApp::GetCurrentTime() - GStartTime, FApp::GetDeltaTime(), FApp::GetCurrentTime() - GStartTime));
 
 		ViewFamily.EngineShowFlags.DisableAdvancedFeatures();
@@ -83,7 +83,7 @@ void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 	}
 	else if (UClass* ActorClass = Cast<UClass>(ItemModel))
 	{
-		Super::Draw(ActorClass->ClassGeneratedBy, X, Y, Width, Height, RenderTarget, Canvas);
+		Super::Draw(Object, X, Y, Width, Height, Viewport, Canvas, bAdditionalViewFamily);
 	}
 }
 

@@ -21,7 +21,7 @@ public:
 	UItemCore_ThumbnailRenderer(const FObjectInitializer& ObjectInitializer);
 
 	// UThumbnailRenderer implementation
-	void Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* RenderTarget, FCanvas* Canvas) override;
+	void Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily) override;
 	bool CanVisualizeAsset(UObject* Object) override;
 
 	void BeginDestroy() override;

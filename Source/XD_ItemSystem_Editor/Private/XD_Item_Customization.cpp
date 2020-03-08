@@ -152,7 +152,7 @@ void FXD_ItemCoreCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Pr
 		for (uint32 ChildIndex = 0; ChildIndex < FPropertyCustomizeHelper::GetNumChildren(ItemCoreHandle); ++ChildIndex)
 		{
 			const TSharedRef<IPropertyHandle> ChildHandle = ItemCoreHandle->GetChildHandle(ChildIndex).ToSharedRef();
-			UProperty* Property = ChildHandle->GetProperty();
+			FProperty* Property = ChildHandle->GetProperty();
 			// EditDefaultOnly的不显示
 			if (Property && !Property->HasAnyPropertyFlags(EPropertyFlags::CPF_DisableEditOnInstance) && !ExcludePropertyNames.Contains(*Property->GetNameCPP()))
 			{
