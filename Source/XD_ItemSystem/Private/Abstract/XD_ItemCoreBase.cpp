@@ -11,7 +11,6 @@
 #include <Widgets/Notifications/SNotificationList.h>
 
 #include "Inventory/XD_InventoryComponentBase.h"
-#include "XD_ObjectFunctionLibrary.h"
 #include "XD_ItemSystemUtility.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
@@ -203,7 +202,7 @@ TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSkeletalMeshActor() const
 
 UXD_ItemCoreBase* UXD_ItemCoreBase::DeepDuplicateCore(const UObject* Outer, const FName& Name) const
 {
-	return UXD_ObjectFunctionLibrary::DuplicateObject(this, Outer, Name);
+	return NewObject<UXD_ItemCoreBase>(const_cast<UObject*>(Outer), GetClass(), Name, RF_NoFlags, const_cast<UXD_ItemCoreBase*>(this));
 }
 
 AXD_ItemBase* UXD_ItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContextObject)

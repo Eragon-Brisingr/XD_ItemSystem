@@ -9,7 +9,6 @@
 #include <Widgets/Text/STextBlock.h>
 #include <PropertyCustomizationHelpers.h>
 
-#include "XD_PropertyCustomizationEx.h"
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Inventory/XD_InventoryComponentBase.h"
 
@@ -149,7 +148,9 @@ void FXD_ItemCoreCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Pr
 	{
 		TArray<FName> ExcludePropertyNames { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) };
 		TSharedRef<IPropertyHandle> ItemCoreHandle = PropertyHandle->GetChildHandle(0).ToSharedRef();
-		for (uint32 ChildIndex = 0; ChildIndex < FPropertyCustomizeHelper::GetNumChildren(ItemCoreHandle); ++ChildIndex)
+		uint32 ChildNumber;
+		ItemCoreHandle->GetNumChildren(ChildNumber);
+		for (uint32 ChildIndex = 0; ChildIndex < ChildNumber; ++ChildIndex)
 		{
 			const TSharedRef<IPropertyHandle> ChildHandle = ItemCoreHandle->GetChildHandle(ChildIndex).ToSharedRef();
 			FProperty* Property = ChildHandle->GetProperty();

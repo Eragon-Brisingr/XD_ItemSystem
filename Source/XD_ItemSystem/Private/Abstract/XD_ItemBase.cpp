@@ -8,8 +8,6 @@
 #include <Components/SkeletalMeshComponent.h>
 
 #include "Abstract/XD_ItemCoreBase.h"
-#include "XD_ObjectFunctionLibrary.h"
-#include "XD_ActorFunctionLibrary.h"
 #include "XD_ItemSystemUtility.h"
 
 #define LOCTEXT_NAMESPACE "物品" 
@@ -94,11 +92,6 @@ void AXD_ItemBase::OnConstruction(const FTransform& Transform)
 	{
 		InitItemMesh();
 	}
-}
-
-void AXD_ItemBase::WhenPostLoad_Implementation()
-{
-	InitItemMesh();
 }
 
 void AXD_ItemBase::InitStaticMeshComponent(UStaticMeshComponent* StaticMeshComponent)

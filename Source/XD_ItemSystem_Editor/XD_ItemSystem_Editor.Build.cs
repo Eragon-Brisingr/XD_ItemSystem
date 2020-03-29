@@ -47,9 +47,6 @@ public class XD_ItemSystem_Editor : ModuleRules
                 "RenderCore",
 
                 "XD_ItemSystem",
-                "XD_SaveGameSystem",
-                "XD_UnrealLibraryEx",
-				"XD_UnrealLibraryEx_Editor",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

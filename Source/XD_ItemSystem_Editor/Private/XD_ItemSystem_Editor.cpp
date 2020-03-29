@@ -3,14 +3,15 @@
 #include "XD_ItemSystem_Editor.h"
 #include <Modules/ModuleManager.h>
 #include <PropertyEditorModule.h>
-#include "XD_PropertyCustomizationEx.h"
-#include "XD_Item_Customization.h"
 #include <Editor.h>
-#include "XD_ItemActorFactory.h"
 #include <AssetToolsModule.h>
-#include "AssetTypeActions_ItemCore.h"
+#include <PropertyEditorDelegates.h>
+
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Bluprint/XD_ItemCoreBlueprint.h"
+#include "AssetTypeActions_ItemCore.h"
+#include "XD_Item_Customization.h"
+#include "XD_ItemActorFactory.h"
 
 struct FXD_Item;
 
@@ -22,7 +23,7 @@ void FXD_ItemSystem_EditorModule::StartupModule()
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	{
-		RegisterCustomProperty(UXD_ItemCoreBase, FXD_ItemCoreCustomization);
+		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("XD_ItemCoreBase"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FXD_ItemCoreCustomization::MakeInstance));
 	}
 
 	GEditor->ActorFactories.Add(NewObject<UXD_ItemActorFactory>());
@@ -44,7 +45,7 @@ void FXD_ItemSystem_EditorModule::ShutdownModule()
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
- 		PropertyModule.UnregisterCustomClassLayout(GET_TYPE_NAME_CHECKED(UXD_ItemCoreBase));
+ 		PropertyModule.UnregisterCustomClassLayout(TEXT("XD_ItemCoreBase"));
 	}
 
 	if (GEditor)

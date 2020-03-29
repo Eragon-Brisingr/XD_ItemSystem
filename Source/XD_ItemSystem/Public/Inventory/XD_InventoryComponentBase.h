@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include <Components/ActorComponent.h>
-#include "XD_SaveGameInterface.h"
 #include "XD_InventoryComponentBase.generated.h"
 
 class UXD_ItemCoreBase;
@@ -12,7 +11,7 @@ class AXD_ItemBase;
 class AActor;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class XD_ITEMSYSTEM_API UXD_InventoryComponentBase : public UActorComponent, public IXD_SaveGameInterface
+class XD_ITEMSYSTEM_API UXD_InventoryComponentBase : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -32,18 +31,9 @@ public:
 
 	bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
 
-	//IXD_SaveGameInterface
-	void WhenPostLoad_Implementation() override;	
-	void WhenGameInit_Implementation() override;
-	//IXD_SaveGameInterface
-
 #if WITH_EDITOR
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
-
-	UPROPERTY(EditAnywhere, Category = "背包|配置", meta = (DisplayName = "初始道具", ConfigUseItem = true), Instanced)
-	TArray<UXD_ItemCoreBase*> InitItems;
-
 //回调事件
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAddItem, UXD_ItemCoreBase*, ItemCore, int32, AddNumber, int32, ExistNumber);
@@ -62,13 +52,19 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "背包")
 	FOnRemoveItemByOther OnRemoveItemByOther;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<UXD_ItemCoreBase*> PreItemCoreList;
 	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category = "背包", ReplicatedUsing = OnRep_ItemList, SaveGame)
 	TArray<UXD_ItemCoreBase*> ItemCoreList;
 
 	UFUNCTION()
 	void OnRep_ItemList();
+protected:
+	template<typename TPredicate>
+	friend int32 RemoveItemByPredicate(UXD_InventoryComponentBase* Inventory, int32& Number, const TPredicate& Predicate);
+
+	void WhenItemCoreAdded(UXD_ItemCoreBase* AddedItemCore);
+	void WhenItemCoreRemoved(UXD_ItemCoreBase* RemovedItemCore);
 public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	TArray<UXD_ItemCoreBase*> AddItemCore(const UXD_ItemCoreBase* ItemCore, int32 Number = 1);
@@ -97,10 +93,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "背包")
 	void ClearItem();
-	
-protected:
-	TArray<UXD_ItemCoreBase*> AddItemCoreInner(const UXD_ItemCoreBase* ItemCore, int32 Number, const bool NotifyUpdate);
-
 	// 功能函数
 public:
 	UFUNCTION(BlueprintCallable, Category = "背包")

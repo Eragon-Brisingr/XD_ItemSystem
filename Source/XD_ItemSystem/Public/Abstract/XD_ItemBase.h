@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include <GameFramework/Actor.h>
-#include "XD_SaveGameInterface.h"
 #include <GameplayTagContainer.h>
 #include "XD_ItemBase.generated.h"
 
@@ -13,7 +12,7 @@
 */
 
 UCLASS(abstract)
-class XD_ITEMSYSTEM_API AXD_ItemBase : public AActor, public IXD_SaveGameInterface
+class XD_ITEMSYSTEM_API AXD_ItemBase : public AActor
 {
 	GENERATED_BODY()
 	
@@ -32,11 +31,6 @@ public:
 	void PostInitProperties() override;
 	void PostInitializeComponents() override;
 	void OnConstruction(const FTransform& Transform) override;
-public:
-	//ISaveGameInterface
-	void WhenPostLoad_Implementation() override;
-	//End ISaveGameInterface
-
 public:
 	//初始化模型
 	virtual void InitItemMesh() {}
