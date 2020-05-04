@@ -13,7 +13,7 @@
 class FCanvas;
 class FRenderTarget;
 
-UCLASS(CustomConstructor, Config = Editor)
+UCLASS()
 class UItemCore_ThumbnailRenderer : public UBlueprintThumbnailRenderer
 {
 	GENERATED_BODY()

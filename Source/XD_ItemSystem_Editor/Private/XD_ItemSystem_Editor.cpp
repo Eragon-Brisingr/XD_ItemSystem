@@ -59,7 +59,10 @@ void FXD_ItemSystem_EditorModule::ShutdownModule()
 		AssetTools.UnregisterAssetTypeActions(AssetTypeActions_ItemCore.ToSharedRef());
 	}
 
-	//UThumbnailManager::Get().UnregisterCustomRenderer(UXD_ItemCoreBlueprint::StaticClass());
+	if (UObjectInitialized())
+	{
+		UThumbnailManager::Get().UnregisterCustomRenderer(UXD_ItemCoreBlueprint::StaticClass());
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
