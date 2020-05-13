@@ -24,6 +24,7 @@ void FXD_ItemSystem_EditorModule::StartupModule()
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	{
 		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("XD_ItemCoreBase"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FXD_ItemCoreCustomization::MakeInstance));
+		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("XD_ItemModelData"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FXD_ItemModelDataCustomization::MakeInstance));
 	}
 
 	GEditor->ActorFactories.Add(NewObject<UXD_ItemActorFactory>());
@@ -46,6 +47,7 @@ void FXD_ItemSystem_EditorModule::ShutdownModule()
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
  		PropertyModule.UnregisterCustomClassLayout(TEXT("XD_ItemCoreBase"));
+		PropertyModule.UnregisterCustomClassLayout(TEXT("XD_ItemModelData"));
 	}
 
 	if (GEditor)
@@ -59,10 +61,7 @@ void FXD_ItemSystem_EditorModule::ShutdownModule()
 		AssetTools.UnregisterAssetTypeActions(AssetTypeActions_ItemCore.ToSharedRef());
 	}
 
-	if (UObjectInitialized())
-	{
-		UThumbnailManager::Get().UnregisterCustomRenderer(UXD_ItemCoreBlueprint::StaticClass());
-	}
+	//UThumbnailManager::Get().UnregisterCustomRenderer(UXD_ItemCoreBlueprint::StaticClass());
 }
 
 #undef LOCTEXT_NAMESPACE

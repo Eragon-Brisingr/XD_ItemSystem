@@ -26,7 +26,63 @@ private:
 };
 #endif
 
-UCLASS(abstract, BlueprintType, EditInlineNew)
+UENUM()
+enum class EItemModelType : uint8
+{
+	StaticMesh,
+	SkeletalMesh,
+	Actor,
+	None
+};
+
+USTRUCT()
+struct XD_ITEMSYSTEM_API FXD_ItemModelData
+{
+	GENERATED_BODY()
+public:
+	FXD_ItemModelData() = default;
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
+	TSoftObjectPtr<UObject> Model;
+	UPROPERTY(VisibleAnywhere, meta = (DisplayName = "模型类型"))
+	EItemModelType ModelType = EItemModelType::None;
+	// TODO：考虑缩略图情况
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "模型材质覆盖"))
+	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MaterialOverride;
+#if WITH_EDITOR
+	void UpdateModelType();
+#endif
+};
+
+USTRUCT(BlueprintType, BlueprintInternalUseOnly)
+struct XD_ITEMSYSTEM_API FXD_ItemCoreSparseData
+{
+	GENERATED_BODY()
+public:
+	FXD_ItemCoreSparseData();
+	
+#if WITH_EDITORONLY_DATA
+	// HACK：不明原因导致SparseData的第一个SoftObject的编辑器赋值会Crash，占位
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (NoGetter), AdvancedDisplay)
+	TSoftObjectPtr<UObject> HACK_SOFTOBJECT_SLOT;
+#endif
+
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "物品名"))
+	FText ItemNameValue;
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "模型", GetByRef))
+	FXD_ItemModelData ItemModelValue;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "在背包中可以叠加"))
+	uint8 bCanCompositeInInventoryValue : 1;
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "物品模型可合并"))
+	uint8 bCanMergeItemValue : 1;
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "最小合并数目", ClampMin = "2"))
+	int32 MinItemMergeNumberValue = 5;
+	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "合并时模型", GetByRef))
+	FXD_ItemModelData MergeItemModelValue;
+};
+
+UCLASS(abstract, BlueprintType, EditInlineNew, SparseClassDataTypes = XD_ItemCoreSparseData)
 class XD_ITEMSYSTEM_API UXD_ItemCoreBase : public UObject
 {
 	GENERATED_BODY()
@@ -39,42 +95,23 @@ public:
 	UWorld* GetWorld() const override;
 
 #if WITH_EDITOR
+	void PostLoad() override;
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 public:
 	UPROPERTY(Transient)
 	UXD_InventoryComponentBase* OwingInventory;
 	
-	UPROPERTY(SaveGame, EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "物品名"))
-	FText ItemName;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
-	TSoftObjectPtr<UObject> ItemMesh;
-	// TODO：材质复写，考虑缩略图情况
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "模型材质覆盖"))
-	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MeshMaterialOverrideList;
-
 	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (ExposeOnSpawn = "true", DisplayName = "数量", ClampMin = "1"))
 	int32 Number = 1;
 	UFUNCTION()
 	void OnRep_Number(int32 PreNumber);
-	
+
 	// 物品合并
-public:
-	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "物品模型可合并"))
-	uint8 bCanMergeItem : 1;
-	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "最小合并数目", ClampMin = "2", EditCondition = bCanMergeItem))
-	int32 MinItemMergeNumber = 5;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "道具合并时模型", AllowedClasses = "StaticMesh,SkeletalMesh", EditCondition = bCanMergeItem))
-	TSoftObjectPtr<UObject> ItemMergeMesh;
-	// TODO：材质复写，考虑缩略图情况
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "物品", meta = (DisplayName = "合并模型材质覆盖", EditCondition = bCanMergeItem))
-	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MergeMeshMaterialOverrideList;
-	
-	bool CanMergeItem() const { return bCanMergeItem && !ItemMergeMesh.IsNull(); }
+	bool CanMergeItem() const { return GetCanMergeItemValue() && !GetMergeItemModelValue().Model.IsNull(); }
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	bool IsMergedItem() const { return CanMergeItem() && Number >= MinItemMergeNumber; }
-	TSoftObjectPtr<UObject> GetCurrentItemModel() const;
+	bool IsMergedItem() const { return CanMergeItem() && Number >= GetMinItemMergeNumberValue(); }
+	virtual const FXD_ItemModelData& GetCurrentItemModel() const;
 
 	//生成实体
 public:
@@ -107,10 +144,8 @@ private:
 	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "在背包中可以叠加"))
-	uint8 bCanCompositeInInventory : 1;
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
-	bool CanCompositeInInventory() const { return bCanCompositeInInventory; }
+	bool CanCompositeInInventory() const { return GetCanCompositeInInventoryValue(); }
 
 	//若有增加物品的属性，且该属性可变，需重载
 	UFUNCTION(BlueprintPure, Category = "物品|基础")

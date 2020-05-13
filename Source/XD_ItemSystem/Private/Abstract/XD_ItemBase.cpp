@@ -6,6 +6,8 @@
 #include <Engine/ActorChannel.h>
 #include <Components/StaticMeshComponent.h>
 #include <Components/SkeletalMeshComponent.h>
+#include <Engine/AssetManager.h>
+#include <Engine/StreamableManager.h>
 
 #include "Abstract/XD_ItemCoreBase.h"
 #include "XD_ItemSystemUtility.h"
@@ -56,29 +58,6 @@ bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutB
 	return IsFailed;
 }
 
-void AXD_ItemBase::PostInitProperties()
-{
-	Super::PostInitProperties();
-	
-	// 数据有效性修复
-	if (ItemCore)
-	{
-		if (ItemCore->CanMergeItem())
-		{
-			ensure(ItemCore->Number == 1 || ItemCore->Number >= ItemCore->MinItemMergeNumber);
-			if (ItemCore->Number < ItemCore->MinItemMergeNumber)
-			{
-				ItemCore->Number = 1;
-			}
-		}
-		else
-		{
-			ensure(ItemCore->Number == 1);
-			ItemCore->Number = 1;
-		}
-	}
-}
-
 void AXD_ItemBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -96,18 +75,58 @@ void AXD_ItemBase::OnConstruction(const FTransform& Transform)
 
 void AXD_ItemBase::InitStaticMeshComponent(UStaticMeshComponent* StaticMeshComponent)
 {
-	TSoftObjectPtr<UObject> StaticMesh = ItemCore->IsMergedItem() ? ItemCore->ItemMergeMesh : ItemCore->ItemMesh;
-	// TODO：异步加载
-	UStaticMesh* ItemMesh = CastChecked<UStaticMesh>(StaticMesh.LoadSynchronous());
-	StaticMeshComponent->SetStaticMesh(ItemMesh);
+	const FXD_ItemModelData& ModelData = ItemCore->GetCurrentItemModel();
+	if (ensureAlways(ModelData.ModelType == EItemModelType::StaticMesh))
+	{
+		TSoftObjectPtr<UObject> StaticMesh = ModelData.Model;
+
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		TArray<FSoftObjectPath> ItemsToStream = { StaticMesh.ToSoftObjectPath() };
+		for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
+		{
+			ItemsToStream.Add(Pair.Value.ToSoftObjectPath());
+		}
+		Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, [=]
+		{
+			const FXD_ItemModelData& ModelData = ItemCore->GetCurrentItemModel();
+			if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(ModelData.Model.Get()))
+			{
+				StaticMeshComponent->SetStaticMesh(StaticMesh);
+				for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
+				{
+					StaticMeshComponent->SetMaterialByName(Pair.Key, Pair.Value.Get());
+				}
+			}
+		}));
+	}
 }
 
 void AXD_ItemBase::InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMeshComponent)
 {
-	TSoftObjectPtr<UObject> SkeletalMesh = ItemCore->IsMergedItem() ? ItemCore->ItemMergeMesh : ItemCore->ItemMesh;
-	// TODO：异步加载
-	USkeletalMesh* ItemMesh = CastChecked<USkeletalMesh>(SkeletalMesh.LoadSynchronous());
-	SkeletalMeshComponent->SetSkeletalMesh(ItemMesh);
+	const FXD_ItemModelData& ModelData = ItemCore->GetCurrentItemModel();
+	if (ensureAlways(ModelData.ModelType == EItemModelType::SkeletalMesh))
+	{
+		TSoftObjectPtr<UObject> SkeletalMesh = ModelData.Model;
+
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		TArray<FSoftObjectPath> ItemsToStream = { SkeletalMesh.ToSoftObjectPath() };
+		for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
+		{
+			ItemsToStream.Add(Pair.Value.ToSoftObjectPath());
+		}
+		Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, [=]
+		{
+			const FXD_ItemModelData& ModelData = ItemCore->GetCurrentItemModel();
+			if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(ModelData.Model.Get()))
+			{
+				SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+				for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
+				{
+					SkeletalMeshComponent->SetMaterialByName(Pair.Key, Pair.Value.Get());
+				}
+			}
+		}));
+	}
 }
 
 void AXD_ItemBase::WhenItemInWorldSetting()
@@ -148,6 +167,27 @@ void AXD_ItemBase::OnRep_AttachmentReplication()
 }
 
 #if WITH_EDITOR
+void AXD_ItemBase::PostLoad()
+{
+	Super::PostLoad();
+
+	if (ItemCore)
+	{
+		if (ItemCore->CanMergeItem())
+		{
+			ensure(ItemCore->Number == 1 || ItemCore->Number >= ItemCore->GetMinItemMergeNumberValue());
+			if (ItemCore->Number < ItemCore->GetMinItemMergeNumberValue())
+			{
+				ItemCore->Number = 1;
+			}
+		}
+		else
+		{
+			ensure(ItemCore->Number == 1);
+			ItemCore->Number = 1;
+		}
+	}
+}
 
 void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

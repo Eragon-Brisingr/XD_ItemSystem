@@ -6,9 +6,10 @@
 #include <Modules/ModuleManager.h>
 #include <ClassViewerModule.h>
 #include <Kismet2/SClassPickerDialog.h>
-#include "Abstract/XD_ItemCoreBase.h"
 #include <AssetTypeCategories.h>
 #include <ClassViewerFilter.h>
+
+#include "Abstract/XD_ItemCoreBase.h"
 #include "Bluprint/XD_ItemCoreBlueprint.h"
 #include "Bluprint/XD_ItemCoreGenerateClass.h"
 
@@ -22,7 +23,7 @@ UXD_ItemCoreFactory::UXD_ItemCoreFactory()
 
 	bEditAfterNew = true;
 
-	SupportedClass = UXD_ItemCoreBase::StaticClass();
+	SupportedClass = UXD_ItemCoreBlueprint::StaticClass();
 }
 
 FText UXD_ItemCoreFactory::GetDisplayName() const
@@ -37,11 +38,6 @@ FText UXD_ItemCoreFactory::GetToolTip() const
 
 UObject* UXD_ItemCoreFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
-// 	UClass* BlueprintClass = nullptr;
-// 	UClass* BlueprintGeneratedClass = nullptr;
-// 	IKismetCompilerInterface& KismetCompilerModule = FModuleManager::LoadModuleChecked<IKismetCompilerInterface>("KismetCompiler");
-// 	KismetCompilerModule.GetBlueprintTypesForClass(ItemCoreClass, BlueprintClass, BlueprintGeneratedClass);
-
 	return FKismetEditorUtilities::CreateBlueprint(ItemCoreClass, InParent, InName, EBlueprintType::BPTYPE_Normal, UXD_ItemCoreBlueprint::StaticClass(), UXD_ItemCoreGenerateClass::StaticClass());
 }
 

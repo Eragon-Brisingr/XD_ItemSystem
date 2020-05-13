@@ -24,15 +24,20 @@ bool UXD_ItemActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText
 		UObject* AssetClass = AssetData.GetAsset();
 		if (UXD_ItemCoreBlueprint* Blueprint = Cast<UXD_ItemCoreBlueprint>(AssetClass))
 		{
-			// TODO：资源有效性检查
-			if (Blueprint->GeneratedClass->IsChildOf<UXD_ItemCoreBase>())
+			if (TSubclassOf<UXD_ItemCoreBase> ItemClass = CastChecked<UClass>(Blueprint->GeneratedClass))
 			{
-				//OutErrorMsg = LOCTEXT("CanCreateActorFrom_NoTileMap", "No tile map was specified.");
+				UXD_ItemCoreBase* ItemCore = CastChecked<UXD_ItemCoreBase>(ItemClass.GetDefaultObject());
+				const FXD_ItemModelData& ItemModelData = ItemCore->GetCurrentItemModel();
+				if (ItemModelData.ModelType == EItemModelType::None || ItemModelData.Model.IsNull())
+				{
+					OutErrorMsg = LOCTEXT("模型未配置", "模型未配置");
+					return false;
+				}
 				return true;
 			}
 		}
 	}
-	return true;
+	return false;
 }
 
 AActor* UXD_ItemActorFactory::SpawnActor(UObject* Asset, ULevel* InLevel, const FTransform& Transform, EObjectFlags InObjectFlags, const FName Name)

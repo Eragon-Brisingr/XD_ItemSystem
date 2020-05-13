@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AssetTypeActions_Base.h"
-#include "ThumbnailRendering/BlueprintThumbnailRenderer.h"
+#include <AssetTypeActions/AssetTypeActions_Blueprint.h>
+#include <ThumbnailRendering/BlueprintThumbnailRenderer.h>
 #include "AssetTypeActions_ItemCore.generated.h"
 
 /**
@@ -31,7 +31,7 @@ private:
 };
 
 
-class XD_ITEMSYSTEM_EDITOR_API FAssetTypeActions_ItemCore : public FAssetTypeActions_Base
+class XD_ITEMSYSTEM_EDITOR_API FAssetTypeActions_ItemCore : public FAssetTypeActions_Blueprint
 {
 public:
 	using Super = FAssetTypeActions_Base;

@@ -45,8 +45,9 @@ public class XD_ItemSystem_Editor : ModuleRules
                 "EditorStyle",
                 "PropertyEditor",
                 "RenderCore",
+				"AssetTools",
 
-                "XD_ItemSystem",
+				"XD_ItemSystem",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

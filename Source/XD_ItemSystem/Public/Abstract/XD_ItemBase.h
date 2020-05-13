@@ -28,7 +28,6 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > & OutLifetimeProps) const override;
 	bool ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags) override;
-	void PostInitProperties() override;
 	void PostInitializeComponents() override;
 	void OnConstruction(const FTransform& Transform) override;
 public:
@@ -48,6 +47,7 @@ public:
 	void OnRep_AttachmentReplication() override;
 public:
 #if WITH_EDITOR
+	void PostLoad() override;
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 

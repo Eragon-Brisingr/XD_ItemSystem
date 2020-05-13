@@ -17,12 +17,46 @@
 
 #if WITH_EDITOR
 uint8 FSpawnPreviewItemScope::Counter;
+
+void FXD_ItemModelData::UpdateModelType()
+{
+	if (UObject* ModelObj = Model.LoadSynchronous())
+	{
+		if (ModelObj->IsA<UStaticMesh>())
+		{
+			ModelType = EItemModelType::StaticMesh;
+		}
+		else if (ModelObj->IsA<USkeletalMesh>())
+		{
+			ModelType = EItemModelType::SkeletalMesh;
+		}
+		else if (UClass* ModelClass = Cast<UClass>(ModelObj))
+		{
+			check(ModelClass->IsChildOf<AActor>());
+			ModelType = EItemModelType::Actor;
+		}
+		else
+		{
+			checkNoEntry();
+		}
+	}
+	else
+	{
+		ModelType = EItemModelType::None;
+	}
+}
 #endif
 
+FXD_ItemCoreSparseData::FXD_ItemCoreSparseData() :
+	ItemNameValue(LOCTEXT("物品", "物品")),
+	bCanCompositeInInventoryValue(true),
+	bCanMergeItemValue(false)
+{
+
+}
+
 UXD_ItemCoreBase::UXD_ItemCoreBase(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
-	: Super(ObjectInitializer), 
-	ItemName(LOCTEXT("物品", "物品")),
-	bCanCompositeInInventory(true)
+	: Super(ObjectInitializer)
 {
 
 }
@@ -56,6 +90,18 @@ UWorld* UXD_ItemCoreBase::GetWorld() const
 }
 
 #if WITH_EDITOR
+void UXD_ItemCoreBase::PostLoad()
+{
+	Super::PostLoad();
+
+// 	if (HasAnyFlags(RF_ClassDefaultObject))
+// 	{
+// 		FXD_ItemCoreSparseData* ItemCoreSparseData = GetXD_ItemCoreSparseData();
+// 		ItemCoreSparseData->ItemModelValue.UpdateModelType();
+// 		ItemCoreSparseData->MergeItemModelValue.UpdateModelType();
+// 	}
+}
+
 void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -72,7 +118,7 @@ void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 				TSharedPtr<SNotificationItem> NotificationItem = FSlateNotificationManager::Get().AddNotification(NotificationInfo);
 				NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
 			}
-			else if (Number < MinItemMergeNumber && Number != 1)
+			else if (Number < GetMinItemMergeNumberValue() && Number != 1)
 			{
 				Number = 1;
 				FNotificationInfo NotificationInfo(LOCTEXT("道具数量小于最小合并数量提示", "道具数量小于最小合并数量"));
@@ -99,9 +145,9 @@ void UXD_ItemCoreBase::OnRep_Number(int32 PreNumber)
 	}
 }
 
-TSoftObjectPtr<UObject> UXD_ItemCoreBase::GetCurrentItemModel() const
+const FXD_ItemModelData& UXD_ItemCoreBase::GetCurrentItemModel() const
 {
-	return IsMergedItem() ? ItemMergeMesh : ItemMesh;
+	return IsMergedItem() ? GetMergeItemModelValue() : GetItemModelValue();
 }
 
 AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
@@ -175,18 +221,21 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 
 TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSpawnedItemClass(int32 SpawnedNumber) const
 {
-	TSoftObjectPtr<UObject> MeshPtr = GetCurrentItemModel();
-	// TODO：异步加载
-	UObject* Mesh = MeshPtr.LoadSynchronous();
-	if (Mesh->IsA<UStaticMesh>())
+	const FXD_ItemModelData& ModelData = GetCurrentItemModel();
+	const EItemModelType ModelType = ModelData.ModelType;
+	if (ModelType == EItemModelType::StaticMesh)
 	{
 		return GetStaticMeshActor();
 	}
-	else if (Mesh->IsA<USkeletalMesh>())
+	else if (ModelType == EItemModelType::SkeletalMesh)
 	{
 		return GetSkeletalMeshActor();
 	}
-	checkNoEntry();
+	else if (ModelType == EItemModelType::Actor)
+	{
+		return nullptr;
+	}
+	ensure(false);
 	return nullptr;
 }
 
@@ -244,7 +293,7 @@ bool UXD_ItemCoreBase::IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) con
 
 FText UXD_ItemCoreBase::GetItemName_Implementation() const
 {
-	return ItemName;
+	return GetItemNameValue();
 }
 
 void UXD_ItemCoreBase::WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* ThrowToLevel)
@@ -253,7 +302,7 @@ void UXD_ItemCoreBase::WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* 
 	{
 		FVector ThrowLocation = WhoThrowed->GetActorLocation() + WhoThrowed->GetActorRotation().RotateVector(FVector(100.f, 0.f, 0.f));
 		FRotator ThrowRotation = WhoThrowed->GetActorRotation();
-		if (ThrowNumber > MinItemMergeNumber && CanMergeItem())
+		if (ThrowNumber > GetMinItemMergeNumberValue() && CanMergeItem())
 		{
 			AXD_ItemBase* SpawnedItem = SpawnItemActorInLevel(ThrowToLevel, ThrowNumber, ThrowLocation, ThrowRotation);
 			SpawnedItem->WhenItemInWorldSetting();

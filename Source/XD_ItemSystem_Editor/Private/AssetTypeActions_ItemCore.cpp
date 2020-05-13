@@ -29,7 +29,7 @@ void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 	{
 		return;
 	}
-	TSoftObjectPtr<UObject> ItemModelPtr = ItemCore->GetCurrentItemModel();
+	TSoftObjectPtr<UObject> ItemModelPtr = ItemCore->GetCurrentItemModel().Model;
 	if (ItemModelPtr.IsNull())
 	{
 		return;
@@ -100,7 +100,7 @@ bool UItemCore_ThumbnailRenderer::CanVisualizeAsset(UObject* Object)
 	{
 		return false;
 	}
-	TSoftObjectPtr<UObject> ItemModel = ItemCore->GetCurrentItemModel();
+	TSoftObjectPtr<UObject> ItemModel = ItemCore->GetCurrentItemModel().Model;
 	if (ItemModel.IsNull())
 	{
 		return false;
@@ -136,12 +136,12 @@ FText FAssetTypeActions_ItemCore::GetName() const
 
 UClass* FAssetTypeActions_ItemCore::GetSupportedClass() const
 {
-	return UXD_ItemCoreBase::StaticClass();
+	return UXD_ItemCoreBlueprint::StaticClass();
 }
 
 FColor FAssetTypeActions_ItemCore::GetTypeColor() const
 {
-	return FColor::Blue;
+	return FLinearColor(0.2f, 0.2f, 1.f).ToFColor(true);
 }
 
 uint32 FAssetTypeActions_ItemCore::GetCategories()

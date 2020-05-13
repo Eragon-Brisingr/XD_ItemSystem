@@ -8,6 +8,8 @@
 #include <Widgets/Images/SImage.h>
 #include <Widgets/Text/STextBlock.h>
 #include <PropertyCustomizationHelpers.h>
+#include <Engine/StaticMesh.h>
+#include <Engine/SkeletalMesh.h>
 
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Inventory/XD_InventoryComponentBase.h"
@@ -74,7 +76,7 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 			]
 		]
 	.ValueContent()
-		.HAlign(HAlign_Fill)	
+		.HAlign(HAlign_Fill)
 		[
 			([&]()->TSharedRef<SWidget>
 				{
@@ -143,19 +145,64 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 void FXD_ItemCoreCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	UObject* Value;
-	FPropertyAccess::Result Access = PropertyHandle->GetValue(Value);
-	if (Access != FPropertyAccess::MultipleValues && Value)
+	if (PropertyHandle->GetValue(Value) != FPropertyAccess::MultipleValues && Value)
 	{
-		TArray<FName> ExcludePropertyNames { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) };
+		static TArray<FName> ExcludePropertyNames { GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number) };
 		TSharedRef<IPropertyHandle> ItemCoreHandle = PropertyHandle->GetChildHandle(0).ToSharedRef();
 		uint32 ChildNumber;
 		ItemCoreHandle->GetNumChildren(ChildNumber);
 		for (uint32 ChildIndex = 0; ChildIndex < ChildNumber; ++ChildIndex)
 		{
 			const TSharedRef<IPropertyHandle> ChildHandle = ItemCoreHandle->GetChildHandle(ChildIndex).ToSharedRef();
-			FProperty* Property = ChildHandle->GetProperty();
+			const FProperty* Property = ChildHandle->GetProperty();
 			// EditDefaultOnly的不显示
 			if (Property && !Property->HasAnyPropertyFlags(EPropertyFlags::CPF_DisableEditOnInstance) && !ExcludePropertyNames.Contains(*Property->GetNameCPP()))
+			{
+				ChildBuilder.AddProperty(ChildHandle);
+			}
+		}
+	}
+}
+
+void FXD_ItemModelDataCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
+{
+	TSharedPtr<IPropertyHandle> Model_Handle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FXD_ItemModelData, Model));
+	
+	Model_Handle->SetOnPropertyValueChanged(FSimpleDelegate::CreateLambda([=]
+	{
+		TArray<UObject*> Outers;
+		PropertyHandle->GetOuterObjects(Outers);
+		for (UObject* Outer : Outers)
+		{
+			if (FXD_ItemModelData* ItemModelData = reinterpret_cast<FXD_ItemModelData*>(PropertyHandle->GetValueBaseAddress(reinterpret_cast<uint8*>(Outer->GetClass()->GetOrCreateSparseClassData()))))
+			{
+				ItemModelData->UpdateModelType();
+			}
+		}
+	}));
+
+	HeaderRow.NameContent()
+		[
+			PropertyHandle->CreatePropertyNameWidget()
+		]
+	.ValueContent()
+		.HAlign(HAlign_Fill)
+		[
+			Model_Handle->CreatePropertyValueWidget()
+		];
+}
+
+void FXD_ItemModelDataCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
+{
+	static TArray<FName> ExcludePropertyNames{ GET_MEMBER_NAME_CHECKED(FXD_ItemModelData, Model) };
+	uint32 ChildNumber;
+	if (PropertyHandle->GetNumChildren(ChildNumber) != FPropertyAccess::Fail)
+	{
+		for (uint32 ChildIndex = 0; ChildIndex < ChildNumber; ++ChildIndex)
+		{
+			const TSharedRef<IPropertyHandle> ChildHandle = PropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
+			const FProperty* Property = ChildHandle->GetProperty();
+			if (Property && !ExcludePropertyNames.Contains(*Property->GetNameCPP()))
 			{
 				ChildBuilder.AddProperty(ChildHandle);
 			}

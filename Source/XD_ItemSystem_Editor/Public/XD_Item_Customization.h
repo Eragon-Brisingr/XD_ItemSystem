@@ -15,8 +15,14 @@ class XD_ITEMSYSTEM_EDITOR_API FXD_ItemCoreCustomization : public IPropertyTypeC
 	void CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 	void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 public:
-	static TSharedRef<IPropertyTypeCustomization> MakeInstance()
-	{
-		return MakeShareable(new FXD_ItemCoreCustomization);
-	}
+	static TSharedRef<IPropertyTypeCustomization> MakeInstance() { return MakeShareable(new FXD_ItemCoreCustomization); }
+};
+
+
+class XD_ITEMSYSTEM_EDITOR_API FXD_ItemModelDataCustomization : public IPropertyTypeCustomization
+{
+	void CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
+	void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
+public:
+	static TSharedRef<IPropertyTypeCustomization> MakeInstance() { return MakeShareable(new FXD_ItemModelDataCustomization); }
 };
