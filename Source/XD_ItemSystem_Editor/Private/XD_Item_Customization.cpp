@@ -13,6 +13,7 @@
 
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Inventory/XD_InventoryComponentBase.h"
+#include "Bluprint/ItemEntityBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemCore类型自定义面板控件"
 
@@ -176,6 +177,10 @@ void FXD_ItemModelDataCustomization::CustomizeHeader(TSharedRef<IPropertyHandle>
 		{
 			if (FXD_ItemModelData* ItemModelData = reinterpret_cast<FXD_ItemModelData*>(PropertyHandle->GetValueBaseAddress(reinterpret_cast<uint8*>(Outer->GetClass()->GetOrCreateSparseClassData()))))
 			{
+				if (UItemEntityBlueprint* ItemEntityBlueprint = Cast<UItemEntityBlueprint>(ItemModelData->Model.Get()))
+				{
+					ItemModelData->Model = *ItemEntityBlueprint->GeneratedClass;
+				}
 				ItemModelData->UpdateModelType();
 			}
 		}

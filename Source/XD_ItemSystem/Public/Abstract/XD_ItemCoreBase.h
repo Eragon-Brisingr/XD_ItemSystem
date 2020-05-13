@@ -42,7 +42,7 @@ struct XD_ITEMSYSTEM_API FXD_ItemModelData
 public:
 	FXD_ItemModelData() = default;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh"))
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "模型", AllowedClasses = "StaticMesh,SkeletalMesh,ItemEntityBlueprint"))
 	TSoftObjectPtr<UObject> Model;
 	UPROPERTY(VisibleAnywhere, meta = (DisplayName = "模型类型"))
 	EItemModelType ModelType = EItemModelType::None;
@@ -137,7 +137,9 @@ public:
 	// 获得生成的具体类型
 	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass() const { return GetSpawnedItemClass(Number); }
 	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass(int32 SpawnedNumber) const;
-
+protected:
+	// 返回所属的ItemEntity
+	virtual TSubclassOf<AXD_ItemBase> GetBelongToActor() const;
 	virtual TSubclassOf<AXD_ItemBase> GetStaticMeshActor() const;
 	virtual TSubclassOf<AXD_ItemBase> GetSkeletalMeshActor() const;
 private:
@@ -154,9 +156,11 @@ public:
 	bool RecevieIsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const;
 	bool RecevieIsEqualWithItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const { return true; }
 
-	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "物品|基础")
-	FText GetItemName() const;
-	virtual FText GetItemName_Implementation() const;
+	UFUNCTION(BlueprintPure, Category = "物品|基础")
+	FText GetItemName() const { return ReceiveGetItemName(); }
+	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础", meta = (DisplayName = "Get Item Name"))
+	FText ReceiveGetItemName() const;
+	FText ReceiveGetItemName_Implementation() const { return GetItemNameValue(); }
 
 	// 道具被丢弃时的行为
 	virtual void WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* ThrowToLevel);

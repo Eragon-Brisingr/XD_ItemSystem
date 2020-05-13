@@ -239,6 +239,11 @@ TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSpawnedItemClass(int32 SpawnedNum
 	return nullptr;
 }
 
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetBelongToActor() const
+{
+	return AXD_ItemBase::StaticClass();
+}
+
 TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetStaticMeshActor() const
 {
 	return AXD_Item_StaticMesh::StaticClass();
@@ -289,11 +294,6 @@ bool UXD_ItemCoreBase::IsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) con
 		return GetClass() == ItemCore->GetClass() && RecevieIsEqualWithItemCore(ItemCore);
 	}
 	return false;
-}
-
-FText UXD_ItemCoreBase::GetItemName_Implementation() const
-{
-	return GetItemNameValue();
 }
 
 void UXD_ItemCoreBase::WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* ThrowToLevel)
