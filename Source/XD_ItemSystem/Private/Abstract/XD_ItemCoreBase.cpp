@@ -211,6 +211,7 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 #if WITH_EDITOR
 			SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);
 #endif
+			SpawnedItem->bOnlyRelevantToOwner = true;
 			SettingSpawnedItem(SpawnedItem, ItemNumber);
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
 			return SpawnedItem;
@@ -225,31 +226,31 @@ TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSpawnedItemClass(int32 SpawnedNum
 	const EItemModelType ModelType = ModelData.ModelType;
 	if (ModelType == EItemModelType::StaticMesh)
 	{
-		return GetStaticMeshActor();
+		return GetStaticMeshEntityType();
 	}
 	else if (ModelType == EItemModelType::SkeletalMesh)
 	{
-		return GetSkeletalMeshActor();
+		return GetSkeletalMeshEntityType();
 	}
 	else if (ModelType == EItemModelType::Actor)
 	{
-		return nullptr;
+		return Cast<UClass>(ModelData.Model.LoadSynchronous());
 	}
 	ensure(false);
 	return nullptr;
 }
 
-TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetBelongToActor() const
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetBelongToEntityType() const
 {
 	return AXD_ItemBase::StaticClass();
 }
 
-TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetStaticMeshActor() const
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetStaticMeshEntityType() const
 {
 	return AXD_Item_StaticMesh::StaticClass();
 }
 
-TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSkeletalMeshActor() const
+TSubclassOf<AXD_ItemBase> UXD_ItemCoreBase::GetSkeletalMeshEntityType() const
 {
 	return AXD_Item_SkeletalMesh::StaticClass();
 }

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include <Engine/Blueprint.h>
+#include <Engine/BlueprintGeneratedClass.h>
 #include "XD_ItemCoreBlueprint.generated.h"
 
 /**
@@ -20,4 +21,12 @@ public:
 	UClass* GetBlueprintClass() const override;
 	void GetReparentingRules(TSet<const UClass*>& AllowedChildrenOfClasses, TSet<const UClass*>& DisallowedChildrenOfClasses) const override;
 #endif
+};
+
+UCLASS()
+class XD_ITEMSYSTEM_API UXD_ItemCoreGenerateClass : public UBlueprintGeneratedClass
+{
+	GENERATED_BODY()
+public:
+
 };

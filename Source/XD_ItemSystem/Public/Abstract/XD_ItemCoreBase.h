@@ -137,11 +137,12 @@ public:
 	// 获得生成的具体类型
 	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass() const { return GetSpawnedItemClass(Number); }
 	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass(int32 SpawnedNumber) const;
-protected:
+
 	// 返回所属的ItemEntity
-	virtual TSubclassOf<AXD_ItemBase> GetBelongToActor() const;
-	virtual TSubclassOf<AXD_ItemBase> GetStaticMeshActor() const;
-	virtual TSubclassOf<AXD_ItemBase> GetSkeletalMeshActor() const;
+	virtual TSubclassOf<AXD_ItemBase> GetBelongToEntityType() const;
+protected:
+	virtual TSubclassOf<AXD_ItemBase> GetStaticMeshEntityType() const;
+	virtual TSubclassOf<AXD_ItemBase> GetSkeletalMeshEntityType() const;
 private:
 	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 

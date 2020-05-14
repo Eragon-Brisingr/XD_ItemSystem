@@ -3,17 +3,23 @@
 #include "XD_Item_Customization.h"
 #include <DetailWidgetRow.h>
 #include <IDetailChildrenBuilder.h>
-#include <Widgets/Input/SButton.h>
 #include <Editor.h>
+#include <Widgets/Input/SButton.h>
 #include <Widgets/Images/SImage.h>
 #include <Widgets/Text/STextBlock.h>
+#include <Widgets/SBoxPanel.h>
+#include <Widgets/Notifications/SNotificationList.h>
+#include <Widgets/Layout/SBox.h>
 #include <PropertyCustomizationHelpers.h>
-#include <Engine/StaticMesh.h>
-#include <Engine/SkeletalMesh.h>
+#include <Framework/Notifications/NotificationManager.h>
+#include <AssetToolsModule.h>
+#include <IAssetTools.h>
 
+#include "Abstract/XD_ItemBase.h"
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Inventory/XD_InventoryComponentBase.h"
 #include "Bluprint/ItemEntityBlueprint.h"
+#include "XD_ItemFactory.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemCore类型自定义面板控件"
 
@@ -179,7 +185,27 @@ void FXD_ItemModelDataCustomization::CustomizeHeader(TSharedRef<IPropertyHandle>
 			{
 				if (UItemEntityBlueprint* ItemEntityBlueprint = Cast<UItemEntityBlueprint>(ItemModelData->Model.Get()))
 				{
-					ItemModelData->Model = *ItemEntityBlueprint->GeneratedClass;
+					UXD_ItemCoreBase* ItemCore = Cast<UXD_ItemCoreBase>(Outer);
+					AXD_ItemBase* ItemEntity = Cast<AXD_ItemBase>(ItemEntityBlueprint->GeneratedClass.GetDefaultObject());
+					if (ItemCore && ItemEntity)
+					{
+						if (ItemCore->IsA(ItemEntity->BelongToCoreType))
+						{
+							ItemModelData->Model = *ItemEntityBlueprint->GeneratedClass;
+						}
+						else
+						{
+							FNotificationInfo NotificationInfo(FText::Format(LOCTEXT("Model赋值实体类型不匹配报错", "道具实体所属的类型为[{0}]，与当前类型[{1}]不匹配"), ItemEntity->BelongToCoreType->GetDisplayNameText(), ItemCore->GetClass()->GetDisplayNameText()));
+							NotificationInfo.bFireAndForget = true;
+							FSlateNotificationManager::Get().AddNotification(NotificationInfo);
+
+							ItemModelData->Model.Reset();
+						}
+					}
+					else
+					{
+						ItemModelData->Model.Reset();
+					}
 				}
 				ItemModelData->UpdateModelType();
 			}
@@ -191,7 +217,8 @@ void FXD_ItemModelDataCustomization::CustomizeHeader(TSharedRef<IPropertyHandle>
 			PropertyHandle->CreatePropertyNameWidget()
 		]
 	.ValueContent()
-		.HAlign(HAlign_Fill)
+		.MinDesiredWidth(250.f)
+		.HAlign(HAlign_Left)
 		[
 			Model_Handle->CreatePropertyValueWidget()
 		];
@@ -201,6 +228,39 @@ void FXD_ItemModelDataCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 {
 	static TArray<FName> ExcludePropertyNames{ GET_MEMBER_NAME_CHECKED(FXD_ItemModelData, Model) };
 	uint32 ChildNumber;
+	ChildBuilder.AddCustomRow(FText::GetEmpty()).NameContent()
+	[
+		SNullWidget::NullWidget
+	]
+	.ValueContent()
+	[
+		SNew(SButton)
+		.ToolTipText(LOCTEXT("创建物品核心对应的实体Actor", "创建物品核心对应的实体Actor"))
+		.Text(FText::FromString(TEXT("创建实体Actor")))
+		.OnClicked_Lambda([=]()
+		{
+			TArray<UObject*> Outers;
+			PropertyHandle->GetOuterObjects(Outers);
+			if (Outers.Num() > 0)
+			{
+				if (UXD_ItemCoreBase* ItemCore = Cast<UXD_ItemCoreBase>(Outers[0]))
+				{
+					TSharedPtr<IPropertyHandle> Model_Handle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FXD_ItemModelData, Model));
+
+					UItemEntityFactory* FactoryInstance = NewObject<UItemEntityFactory>();
+					FactoryInstance->ItemCoreClass = ItemCore->GetClass();
+
+					FAssetToolsModule& AssetToolsModule = FAssetToolsModule::GetModule();
+					UObject* NewAsset = AssetToolsModule.Get().CreateAssetWithDialog(FactoryInstance->GetSupportedClass(), FactoryInstance);
+					if (NewAsset)
+					{
+						Model_Handle->SetValue(NewAsset);
+					}
+				}
+			}
+			return FReply::Handled();
+		})
+	];
 	if (PropertyHandle->GetNumChildren(ChildNumber) != FPropertyAccess::Fail)
 	{
 		for (uint32 ChildIndex = 0; ChildIndex < ChildNumber; ++ChildIndex)

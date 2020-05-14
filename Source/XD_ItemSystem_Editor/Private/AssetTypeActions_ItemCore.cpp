@@ -83,7 +83,7 @@ void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 	}
 	else if (UClass* ActorClass = Cast<UClass>(ItemModel))
 	{
-		Super::Draw(Object, X, Y, Width, Height, Viewport, Canvas, bAdditionalViewFamily);
+		Super::Draw(ActorClass->ClassGeneratedBy, X, Y, Width, Height, Viewport, Canvas, bAdditionalViewFamily);
 	}
 }
 

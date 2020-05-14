@@ -12,7 +12,6 @@
 #include "Abstract/XD_ItemBase.h"
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Bluprint/XD_ItemCoreBlueprint.h"
-#include "Bluprint/XD_ItemCoreGenerateClass.h"
 #include "Bluprint/ItemEntityBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "XD_ItemCoreFactory"
@@ -90,6 +89,11 @@ UItemEntityFactory::UItemEntityFactory()
 	SupportedClass = UItemEntityBlueprint::StaticClass();
 }
 
+bool UItemEntityFactory::CanCreateNew() const
+{
+	return ItemCoreClass ? true : false;
+}
+
 FText UItemEntityFactory::GetDisplayName() const
 {
 	return LOCTEXT("创建道具实体", "创建道具实体");
@@ -100,56 +104,13 @@ FText UItemEntityFactory::GetToolTip() const
 	return LOCTEXT("创建道具实体", "创建道具实体");
 }
 
-uint32 UItemEntityFactory::GetMenuCategories() const
-{
-	return EAssetTypeCategories::Gameplay;
-}
-
 UObject* UItemEntityFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
-	return FKismetEditorUtilities::CreateBlueprint(ItemEntityClass, InParent, InName, EBlueprintType::BPTYPE_Normal, UItemEntityBlueprint::StaticClass(), UBlueprintGeneratedClass::StaticClass());
-}
-
-bool UItemEntityFactory::ConfigureProperties()
-{
-	ItemEntityClass = nullptr;
-
-	FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
-	FClassViewerInitializationOptions Options;
-
-	Options.Mode = EClassViewerMode::ClassPicker;
-
-	class FXD_ItemCoreFilterViewer : public IClassViewerFilter
-	{
-	public:
-		const EClassFlags DisallowedClassFlags = CLASS_Deprecated;
-		const EClassFlags AllowedClassFlags = CLASS_Abstract;
-
-		virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
-		{
-			return InClass->HasAnyClassFlags(AllowedClassFlags) && !InClass->HasAnyClassFlags(DisallowedClassFlags) && InClass->IsChildOf<AXD_ItemBase>();
-		}
-
-		virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
-		{
-			return InUnloadedClassData->HasAnyClassFlags(AllowedClassFlags) && !InUnloadedClassData->HasAnyClassFlags(DisallowedClassFlags) && InUnloadedClassData->IsChildOf(AXD_ItemBase::StaticClass());
-		}
-	};
-
-	Options.ClassFilter = MakeShareable<FXD_ItemCoreFilterViewer>(new FXD_ItemCoreFilterViewer);
-	Options.NameTypeToDisplay = EClassViewerNameTypeToDisplay::Dynamic;
-	Options.DisplayMode = EClassViewerDisplayMode::TreeView;
-
-	const FText TitleText = LOCTEXT("选择道具实体类型", "选择道具实体类型");
-	UClass* ChosenClass = nullptr;
-	const bool bPressedOk = SClassPickerDialog::PickClass(TitleText, Options, ChosenClass, AXD_ItemBase::StaticClass());
-
-	if (bPressedOk)
-	{
-		ItemEntityClass = ChosenClass;
-	}
-
-	return bPressedOk;
+	check(ItemCoreClass && ItemCoreClass.GetDefaultObject()->GetBelongToEntityType());
+	UBlueprint* Blueprint = FKismetEditorUtilities::CreateBlueprint(ItemCoreClass.GetDefaultObject()->GetBelongToEntityType(), InParent, InName, EBlueprintType::BPTYPE_Normal, UItemEntityBlueprint::StaticClass(), UItemEntityGenerateClass::StaticClass());
+	AXD_ItemBase* ItemEntity = CastChecked<AXD_ItemBase>(Blueprint->GeneratedClass.GetDefaultObject());
+	ItemEntity->BelongToCoreType = ItemCoreClass;
+	return Blueprint;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -48,13 +48,12 @@ void AXD_ItemBase::GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > 
 
 bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags)
 {
-	bool IsFailed = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
-
+	bool IsFailed = false;
 	if (ItemCore)
 	{
 		IsFailed |= Channel->ReplicateSubobject(ItemCore, *Bunch, *RepFlags);
 	}
-
+	IsFailed |= Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 	return IsFailed;
 }
 
@@ -127,6 +126,16 @@ void AXD_ItemBase::InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMes
 			}
 		}));
 	}
+}
+
+void AXD_ItemBase::OnActorChannelOpen(class FInBunch& InBunch, class UNetConnection* Connection)
+{
+	Super::OnActorChannelOpen(InBunch, Connection);
+}
+
+void AXD_ItemBase::OnSerializeNewActor(class FOutBunch& OutBunch)
+{
+	Super::OnSerializeNewActor(OutBunch);
 }
 
 void AXD_ItemBase::WhenItemInWorldSetting()
@@ -212,11 +221,9 @@ void AXD_ItemBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 
 void AXD_ItemBase::OnRep_ItemCore()
 {
-	if (ItemCore)
+	if (ensure(ItemCore))
 	{
-		//假设ItemCore的Number网络初始化在InnerItemCore前
 		InitItemMesh();
-		OnItemCoreValidNative.ExecuteIfBound();
 	}
 }
 

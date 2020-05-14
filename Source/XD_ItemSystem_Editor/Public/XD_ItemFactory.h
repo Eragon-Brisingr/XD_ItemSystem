@@ -24,7 +24,6 @@ public:
 
 	FText GetDisplayName() const override;
 	FText GetToolTip() const override;
-
 	UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn) override;
 	bool ConfigureProperties() override;
 };
@@ -37,11 +36,10 @@ public:
 	UItemEntityFactory();
 
 	UPROPERTY(EditAnywhere, Category = "道具")
-	TSubclassOf<AXD_ItemBase> ItemEntityClass;
+	TSubclassOf<UXD_ItemCoreBase> ItemCoreClass;
 
+	bool CanCreateNew() const override;
 	FText GetDisplayName() const override;
 	FText GetToolTip() const override;
-	uint32 GetMenuCategories() const override;
 	UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn) override;
-	bool ConfigureProperties() override;
 };

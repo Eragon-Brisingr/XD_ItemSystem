@@ -3,7 +3,6 @@
 #include "Bluprint/XD_ItemCoreBlueprint.h"
 
 #include "Abstract/XD_ItemCoreBase.h"
-#include "Bluprint/XD_ItemCoreGenerateClass.h"
 
 #if WITH_EDITOR
 UClass* UXD_ItemCoreBlueprint::GetBlueprintClass() const
