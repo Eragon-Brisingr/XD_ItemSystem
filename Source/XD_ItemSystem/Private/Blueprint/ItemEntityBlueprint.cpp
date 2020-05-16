@@ -6,6 +6,7 @@
 #include "Abstract/XD_ItemCoreBase.h"
 #include "Abstract/XD_ItemBase.h"
 
+#if WITH_EDITOR
 UClass* UItemEntityBlueprint::GetBlueprintClass() const
 {
 	return UItemEntityGenerateClass::StaticClass();
@@ -21,3 +22,4 @@ void UItemEntityBlueprint::GetReparentingRules(TSet<const UClass*>& AllowedChild
 		}
 	}
 }
+#endif

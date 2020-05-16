@@ -35,20 +35,37 @@ public:
 #if WITH_EDITOR
 	void PostLoad() override;
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	void CheckForErrors() override;
+	void CheckItemErrors(const FName& LogName);
 #endif //WITH_EDITOR
 	void OnActorChannelOpen(class FInBunch& InBunch, class UNetConnection* Connection) override;
 	void OnSerializeNewActor(class FOutBunch& OutBunch) override;
 public:
 	//初始化模型
-	virtual void InitItemMesh() {}
-
+	void InitItemMesh() { WhenInitItemMesh(); }
 	//物品在世界中的处理
-	virtual void WhenItemInWorldSetting();
-	virtual void SetItemCollisionProfileName(const FName& CollisionProfileName);
-	virtual void SetItemSimulatePhysics(bool bSimulate);
+	void ItemInWorldSetting() { WhenItemInWorld(); }
+	void SetItemCollisionProfileName(const FName& CollisionProfileName) { WhenSetItemCollisionProfileName(CollisionProfileName); }
+	void SetItemSimulatePhysics(bool bSimulate) { WhenSetItemSimulatePhysics(bSimulate); }
 protected:
 	void InitStaticMeshComponent(UStaticMeshComponent* StaticMeshComponent);
 	void InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMeshComponent);
+
+	virtual void WhenInitItemMesh() { ReceiveWhenInitItemMesh(); }
+	UFUNCTION(BlueprintImplementableEvent, Category = "物品", meta = (DisplayName = "When Init Item Mesh"))
+	void ReceiveWhenInitItemMesh();
+
+	virtual void WhenItemInWorld();
+	UFUNCTION(BlueprintImplementableEvent, Category = "物品", meta = (DisplayName = "When Item In World"))
+	void ReceiveWhenItemInWorld();
+
+	virtual void WhenSetItemCollisionProfileName(const FName& CollisionProfileName);
+	UFUNCTION(BlueprintImplementableEvent, Category = "物品", meta = (DisplayName = "When Set Item Collision Profile Name"))
+	void ReceiveWhenSetItemCollisionProfileName(const FName& CollisionProfileName);
+
+	virtual void WhenSetItemSimulatePhysics(bool bSimulate);
+	UFUNCTION(BlueprintImplementableEvent, Category = "物品", meta = (DisplayName = "When Set Item Simulate Physics"))
+	void ReceiveWhenSetItemSimulatePhysics(bool bSimulate);
 public:
 	UPROPERTY(VisibleAnywhere, Instanced, SaveGame, ReplicatedUsing = OnRep_ItemCore, Category = "物品", meta = (DisplayName = "物品核心"))
 	UXD_ItemCoreBase* ItemCore;
@@ -105,7 +122,7 @@ public:
 	UPROPERTY()
 	UStaticMeshComponent* StaticMeshComponent;
 
-	void InitItemMesh() override { InitStaticMeshComponent(StaticMeshComponent); }
+	void WhenInitItemMesh() override { InitStaticMeshComponent(StaticMeshComponent); }
 };
 
 UCLASS()
@@ -119,5 +136,5 @@ public:
 	UPROPERTY()
 	USkeletalMeshComponent* SkeletalMeshComponent;
 
-	void InitItemMesh() override { InitSkeletalMeshComponent(SkeletalMeshComponent); }
+	void WhenInitItemMesh() override { InitSkeletalMeshComponent(SkeletalMeshComponent); }
 };

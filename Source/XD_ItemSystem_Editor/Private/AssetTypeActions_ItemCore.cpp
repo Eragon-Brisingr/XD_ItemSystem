@@ -23,7 +23,7 @@ void UItemCore_ThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 	{
 		return;
 	}
-
+	
 	UXD_ItemCoreBase* ItemCore = ItemCoreBlueprint->GeneratedClass->GetDefaultObject<UXD_ItemCoreBase>();
 	if (ItemCore == nullptr)
 	{

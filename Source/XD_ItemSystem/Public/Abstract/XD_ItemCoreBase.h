@@ -99,29 +99,37 @@ public:
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 public:
-	UPROPERTY(Transient)
-	UXD_InventoryComponentBase* OwingInventory;
-	
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadWrite, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (ExposeOnSpawn = "true", DisplayName = "数量", ClampMin = "1"))
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (DisplayName = "数量", ClampMin = "1"))
 	int32 Number = 1;
 	UFUNCTION()
 	void OnRep_Number(int32 PreNumber);
+	
+	UFUNCTION(BlueprintPure, Category = "物品|基础")
+	FText GetItemName() const { return ReceiveGetItemName(); }
+	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础", meta = (DisplayName = "Get Item Name"))
+	FText ReceiveGetItemName() const;
+	FText ReceiveGetItemName_Implementation() const { return GetItemNameValue(); }
 
 	// 物品合并
 	bool CanMergeItem() const { return GetCanMergeItemValue() && !GetMergeItemModelValue().Model.IsNull(); }
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	bool IsMergedItem() const { return CanMergeItem() && Number >= GetMinItemMergeNumberValue(); }
 	virtual const FXD_ItemModelData& GetCurrentItemModel() const;
-
+	
 	//生成实体
 public:
-	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
-	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
-	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber = 1, const FName& Name = NAME_None, EObjectFlags InObjectFlags = RF_NoFlags, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	UFUNCTION(BlueprintCallable, Category = "物品")
+	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, FVector Location, FRotator Rotation, int32 ItemNumber = 1, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const { return SpawnItemActorInLevel(OuterLevel,Location, Rotation, ItemNumber, NAME_None, RF_NoFlags, CollisionHandling); }
+	AXD_ItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, int32 ItemNumber = 1, const FName& Name = NAME_None, EObjectFlags InObjectFlags = RF_NoFlags, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 
 	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
-	AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber = 1, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
-
+	AXD_ItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, int32 ItemNumber = 1, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	
+	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject))
+	AXD_ItemBase* SpawnPreviewItemActor(const UObject* WorldContextObject);
+private:
+	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
+public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品", meta = (DeterminesOutputType = "self"))
 	UXD_ItemCoreBase* DeepDuplicateCore(const UObject* Outer, const FName& Name = NAME_None) const;
 	template<typename T>
@@ -130,9 +138,6 @@ public:
 		static_assert(TIsDerivedFrom<T, UXD_ItemCoreBase>::IsDerived, "T must be derived from UXD_ItemCoreBase");
 		return CastChecked<T>(ItemCore->DeepDuplicateCore(Outer, Name));
 	}
-
-	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject))
-	AXD_ItemBase* SpawnPreviewItemActor(const UObject* WorldContextObject);
 
 	// 获得生成的具体类型
 	TSubclassOf<AXD_ItemBase> GetSpawnedItemClass() const { return GetSpawnedItemClass(Number); }
@@ -143,10 +148,12 @@ public:
 protected:
 	virtual TSubclassOf<AXD_ItemBase> GetStaticMeshEntityType() const;
 	virtual TSubclassOf<AXD_ItemBase> GetSkeletalMeshEntityType() const;
-private:
-	void SettingSpawnedItem(AXD_ItemBase* Item, int32 Number) const;
 
+	// 背包操作
 public:
+	UPROPERTY(Transient)
+	UXD_InventoryComponentBase* OwingInventory;
+	
 	UFUNCTION(BlueprintCallable, Category = "物品|基础")
 	bool CanCompositeInInventory() const { return GetCanCompositeInInventoryValue(); }
 
@@ -156,14 +163,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础", meta = (DisplayName = "IsEqualWithItemCore"))
 	bool RecevieIsEqualWithItemCore(const UXD_ItemCoreBase* ItemCore) const;
 	bool RecevieIsEqualWithItemCore_Implementation(const UXD_ItemCoreBase* ItemCore) const { return true; }
-
-	UFUNCTION(BlueprintPure, Category = "物品|基础")
-	FText GetItemName() const { return ReceiveGetItemName(); }
-	UFUNCTION(BlueprintNativeEvent, Category = "物品|基础", meta = (DisplayName = "Get Item Name"))
-	FText ReceiveGetItemName() const;
-	FText ReceiveGetItemName_Implementation() const { return GetItemNameValue(); }
-
-	// 道具被丢弃时的行为
+	
 	virtual void WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* ThrowToLevel);
-	virtual void WhenRemoveFromInventory(class AActor* ItemOwner, int32 RemoveNumber, int32 ExistNumber);
+	virtual void WhenRemoveFromInventory(class AActor* ItemOwner, int32 RemoveNumber, int32 ExistNumber) {}
 };

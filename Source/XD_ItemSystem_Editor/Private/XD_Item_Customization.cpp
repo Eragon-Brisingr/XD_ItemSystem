@@ -14,6 +14,8 @@
 #include <Framework/Notifications/NotificationManager.h>
 #include <AssetToolsModule.h>
 #include <IAssetTools.h>
+#include <DetailLayoutBuilder.h>
+#include <IPropertyUtilities.h>
 
 #include "Abstract/XD_ItemBase.h"
 #include "Abstract/XD_ItemCoreBase.h"
@@ -27,20 +29,18 @@ void FXD_ItemCoreCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Prop
 {
 	UObject* Value = nullptr;
 	FPropertyAccess::Result AccessResult = PropertyHandle->GetValue(Value);
+	UXD_ItemCoreBase* ItemCore = Cast<UXD_ItemCoreBase>(Value);
 
-	bool bShowNumber = Value && PropertyHandle->GetBoolMetaData(TEXT("ConfigUseItem"));
-	if (!bShowNumber)
+	bool bShowNumber = ItemCore && PropertyHandle->GetBoolMetaData(TEXT("ConfigUseItem"));
+	if (!bShowNumber && ItemCore)
 	{
-		if (UXD_ItemCoreBase* ItemCore = Cast<UXD_ItemCoreBase>(Value))
+		if (UObject* Outer = ItemCore->GetOuter())
 		{
-			if (UObject* Outer = ItemCore->GetOuter())
+			if (Outer->IsA<UXD_InventoryComponentBase>() && PropertyHandle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED(UXD_InventoryComponentBase, ItemCoreList))
 			{
-				if (Outer->IsA<UXD_InventoryComponentBase>() && PropertyHandle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED(UXD_InventoryComponentBase, ItemCoreList))
+				if (ItemCore->CanCompositeInInventory())
 				{
-					if (ItemCore->CanCompositeInInventory())
-					{
-						bShowNumber = true;
-					}
+					bShowNumber = true;
 				}
 			}
 		}
@@ -271,6 +271,51 @@ void FXD_ItemModelDataCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 			{
 				ChildBuilder.AddProperty(ChildHandle);
 			}
+		}
+	}
+}
+
+void FXD_ItemCoreDetails::CustomizeDetails(class IDetailLayoutBuilder& DetailBuilder)
+{
+	TSharedRef<IPropertyHandle> Number_Handle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number), UXD_ItemCoreBase::StaticClass());
+
+	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
+	DetailBuilder.GetObjectsBeingCustomized(ObjectsBeingCustomized);
+
+	if (ObjectsBeingCustomized.Num() != 1)
+	{
+		DetailBuilder.HideProperty(Number_Handle);
+		return;
+	}
+
+	if (UXD_ItemCoreBase* ItemCore = Cast<UXD_ItemCoreBase>(ObjectsBeingCustomized[0].Get()))
+	{
+		if (ItemCore->HasAnyFlags(RF_ClassDefaultObject) || ItemCore->Number == 1)
+		{
+			DetailBuilder.HideProperty(Number_Handle);
+
+			TSharedRef<IPropertyHandle> HACK_SOFTOBJECT_SLOT_Handle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(FXD_ItemCoreSparseData, HACK_SOFTOBJECT_SLOT), FXD_ItemCoreSparseData::StaticStruct());
+			DetailBuilder.HideProperty(HACK_SOFTOBJECT_SLOT_Handle);
+
+			TSharedRef<IPropertyHandle> CanMergeItemValue_Handle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(FXD_ItemCoreSparseData, bCanMergeItemValue), FXD_ItemCoreSparseData::StaticStruct());
+			bool CanMergeItem = false;
+			CanMergeItemValue_Handle->GetValue(CanMergeItem);
+			if (CanMergeItem == false)
+			{
+				DetailBuilder.HideProperty(DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(FXD_ItemCoreSparseData, MinItemMergeNumberValue), FXD_ItemCoreSparseData::StaticStruct()));
+				DetailBuilder.HideProperty(DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(FXD_ItemCoreSparseData, MergeItemModelValue), FXD_ItemCoreSparseData::StaticStruct()));
+			}
+
+			CanMergeItemValue_Handle->SetOnPropertyValueChanged(FSimpleDelegate::CreateLambda([PropertyUtilities = DetailBuilder.GetPropertyUtilities()]
+			{
+				PropertyUtilities->ForceRefresh();
+			}));
+		}
+		else
+		{
+			const FString MinItemMergeNumberValue = FString::FromInt(ItemCore->GetMinItemMergeNumberValue());
+			Number_Handle->SetInstanceMetaData(TEXT("ClampMin"), MinItemMergeNumberValue);
+			Number_Handle->SetInstanceMetaData(TEXT("UIMin"), MinItemMergeNumberValue);
 		}
 	}
 }

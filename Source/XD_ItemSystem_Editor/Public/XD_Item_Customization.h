@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "IPropertyTypeCustomization.h"
+#include "IDetailCustomization.h"
 
 /**
  * 
@@ -25,4 +26,11 @@ class XD_ITEMSYSTEM_EDITOR_API FXD_ItemModelDataCustomization : public IProperty
 	void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 public:
 	static TSharedRef<IPropertyTypeCustomization> MakeInstance() { return MakeShareable(new FXD_ItemModelDataCustomization); }
+};
+
+class XD_ITEMSYSTEM_EDITOR_API FXD_ItemCoreDetails : public IDetailCustomization
+{
+public:
+	static TSharedRef<IDetailCustomization> MakeInstance() { return MakeShareable(new FXD_ItemCoreDetails()); }
+	void CustomizeDetails(class IDetailLayoutBuilder& DetailBuilder) override;
 };

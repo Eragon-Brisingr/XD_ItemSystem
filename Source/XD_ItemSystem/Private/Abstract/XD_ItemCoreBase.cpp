@@ -7,8 +7,6 @@
 #include <Engine/BlueprintGeneratedClass.h>
 #include <Engine/StaticMesh.h>
 #include <Engine/SkeletalMesh.h>
-#include <Framework/Notifications/NotificationManager.h>
-#include <Widgets/Notifications/SNotificationList.h>
 
 #include "Inventory/XD_InventoryComponentBase.h"
 #include "XD_ItemSystemUtility.h"
@@ -109,21 +107,22 @@ void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 	FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UXD_ItemCoreBase, Number))
 	{
-		if (AXD_ItemBase* ItemBase = Cast<AXD_ItemBase>(GetOuter()))
+		UObject* Outer = GetOuter();
+		if (Outer && (Outer->IsA<AXD_ItemBase>() || Outer->IsA<UPackage>()))
 		{
 			if (!CanMergeItem())
 			{
-				Number = 1;
-				FNotificationInfo NotificationInfo(LOCTEXT("不可合并道具数量改变错误提示", "不可合并的道具，数量不可变"));
-				TSharedPtr<SNotificationItem> NotificationItem = FSlateNotificationManager::Get().AddNotification(NotificationInfo);
-				NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
+				if (ensure(Number == 1) == false)
+				{
+					Number = 1;
+				}
 			}
-			else if (Number < GetMinItemMergeNumberValue() && Number != 1)
+			else
 			{
-				Number = 1;
-				FNotificationInfo NotificationInfo(LOCTEXT("道具数量小于最小合并数量提示", "道具数量小于最小合并数量"));
-				TSharedPtr<SNotificationItem> NotificationItem = FSlateNotificationManager::Get().AddNotification(NotificationInfo);
-				NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
+				if (ensure(Number < GetMinItemMergeNumberValue() && Number != 1) == false)
+				{
+					Number = 1;
+				}
 			}
 		}
 	}
@@ -150,12 +149,7 @@ const FXD_ItemModelData& UXD_ItemCoreBase::GetCurrentItemModel() const
 	return IsMergedItem() ? GetMergeItemModelValue() : GetItemModelValue();
 }
 
-AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
-{
-	return SpawnItemActorInLevel(OuterLevel, ItemNumber, MakeUniqueObjectName(OuterLevel, GetClass()), RF_NoFlags, Location, Rotation, CollisionHandling);
-}
-
-AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 ItemNumber /*= 1*/, const FName& Name /*= NAME_None*/, EObjectFlags InObjectFlags /*= RF_NoFlags*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
+AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, int32 ItemNumber /*= 1*/, const FName& Name /*= NAME_None*/, EObjectFlags InObjectFlags /*= RF_NoFlags*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
 	if (ensure(OuterLevel))
 	{
@@ -188,7 +182,7 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, int32 
 	return nullptr;
 }
 
-AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, int32 ItemNumber /*= 1*/, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
+AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, int32 ItemNumber /*= 1*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
 	if (ensure(Owner))
 	{
@@ -216,6 +210,24 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
 			return SpawnedItem;
 		}
+	}
+	return nullptr;
+}
+
+AXD_ItemBase* UXD_ItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContextObject)
+{
+	FActorSpawnParameters ActorSpawnParameters;
+	ActorSpawnParameters.bDeferConstruction = true;
+	ActorSpawnParameters.ObjectFlags = RF_Transient;
+	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AXD_ItemBase* SpawnedItem = WorldContextObject->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(Number), ActorSpawnParameters);
+	if (SpawnedItem)
+	{
+		SettingSpawnedItem(SpawnedItem, Number);
+		SpawnedItem->SetReplicates(false);
+		SpawnedItem->FinishSpawning(FTransform::Identity);
+		SpawnedItem->SetItemSimulatePhysics(false);
+		return SpawnedItem;
 	}
 	return nullptr;
 }
@@ -260,24 +272,6 @@ UXD_ItemCoreBase* UXD_ItemCoreBase::DeepDuplicateCore(const UObject* Outer, cons
 	return NewObject<UXD_ItemCoreBase>(const_cast<UObject*>(Outer), GetClass(), Name, RF_NoFlags, const_cast<UXD_ItemCoreBase*>(this));
 }
 
-AXD_ItemBase* UXD_ItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContextObject)
-{
-	FActorSpawnParameters ActorSpawnParameters;
-	ActorSpawnParameters.bDeferConstruction = true;
-	ActorSpawnParameters.ObjectFlags = RF_Transient;
-	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AXD_ItemBase* SpawnedItem = WorldContextObject->GetWorld()->SpawnActor<AXD_ItemBase>(GetSpawnedItemClass(Number), ActorSpawnParameters);
-	if (SpawnedItem)
-	{
-		SettingSpawnedItem(SpawnedItem, Number);
-		SpawnedItem->SetReplicates(false);
-		SpawnedItem->FinishSpawning(FTransform::Identity);
-		SpawnedItem->SetItemSimulatePhysics(false);
-		return SpawnedItem;
-	}
-	return nullptr;
-}
-
 void UXD_ItemCoreBase::SettingSpawnedItem(AXD_ItemBase* Item, int32 ThrowNumber) const
 {
 	Item->ItemCore = UXD_ItemCoreBase::DeepDuplicateCore(this, Item, GET_MEMBER_NAME_CHECKED(AXD_ItemBase, ItemCore));
@@ -305,23 +299,18 @@ void UXD_ItemCoreBase::WhenThrow(AActor* WhoThrowed, int32 ThrowNumber, ULevel* 
 		FRotator ThrowRotation = WhoThrowed->GetActorRotation();
 		if (ThrowNumber > GetMinItemMergeNumberValue() && CanMergeItem())
 		{
-			AXD_ItemBase* SpawnedItem = SpawnItemActorInLevel(ThrowToLevel, ThrowNumber, ThrowLocation, ThrowRotation);
-			SpawnedItem->WhenItemInWorldSetting();
+			AXD_ItemBase* SpawnedItem = SpawnItemActorInLevel(ThrowToLevel, ThrowLocation, ThrowRotation, ThrowNumber, NAME_None, RF_NoFlags);
+			SpawnedItem->ItemInWorldSetting();
 		}
 		else
 		{
 			for (int i = 0; i < ThrowNumber; ++i)
 			{
-				AXD_ItemBase* SpawnedItem = SpawnItemActorInLevel(ThrowToLevel, 1, ThrowLocation, ThrowRotation);
-				SpawnedItem->WhenItemInWorldSetting();
+				AXD_ItemBase* SpawnedItem = SpawnItemActorInLevel(ThrowToLevel, ThrowLocation, ThrowRotation, 1, NAME_None, RF_NoFlags);
+				SpawnedItem->ItemInWorldSetting();
 			}
 		}
 	}
-}
-
-void UXD_ItemCoreBase::WhenRemoveFromInventory(class AActor* ItemOwner, int32 RemoveNumber, int32 ExistNumber)
-{
-
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -23,6 +23,7 @@ void FXD_ItemSystem_EditorModule::StartupModule()
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	{
+		PropertyModule.RegisterCustomClassLayout(TEXT("XD_ItemCoreBase"), FOnGetDetailCustomizationInstance::CreateStatic(&FXD_ItemCoreDetails::MakeInstance));
 		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("XD_ItemCoreBase"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FXD_ItemCoreCustomization::MakeInstance));
 		PropertyModule.RegisterCustomPropertyTypeLayout(TEXT("XD_ItemModelData"), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FXD_ItemModelDataCustomization::MakeInstance));
 	}
@@ -46,8 +47,9 @@ void FXD_ItemSystem_EditorModule::ShutdownModule()
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
- 		PropertyModule.UnregisterCustomClassLayout(TEXT("XD_ItemCoreBase"));
-		PropertyModule.UnregisterCustomClassLayout(TEXT("XD_ItemModelData"));
+		PropertyModule.UnregisterCustomClassLayout(TEXT("XD_ItemCoreBase"));
+ 		PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("XD_ItemCoreBase"));
+		PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("XD_ItemModelData"));
 	}
 
 	if (GEditor)
