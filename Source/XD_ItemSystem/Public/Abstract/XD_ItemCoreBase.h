@@ -99,7 +99,8 @@ public:
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif //WITH_EDITOR
 public:
-	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (DisplayName = "数量", ClampMin = "1"))
+	// TODO：可添加最大叠加上限概念，现在把物品数量配置的上限设置为了1000防止配出太大的数量
+	UPROPERTY(SaveGame, EditAnywhere, BlueprintReadOnly, Category = "物品", ReplicatedUsing = OnRep_Number, meta = (DisplayName = "数量", ClampMin = "1", ClampMax = "1000"))
 	int32 Number = 1;
 	UFUNCTION()
 	void OnRep_Number(int32 PreNumber);

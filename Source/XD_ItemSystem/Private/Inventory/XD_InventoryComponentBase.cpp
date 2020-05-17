@@ -48,8 +48,7 @@ void UXD_InventoryComponentBase::GetLifetimeReplicatedProps(TArray< class FLifet
 
 bool UXD_InventoryComponentBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags)
 {
-	bool IsFailed = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
-
+	bool IsFailed = false;
 	for (UXD_ItemCoreBase* ItemCore : ItemCoreList)
 	{
 		if (ensureAlways(ItemCore))
@@ -57,6 +56,7 @@ bool UXD_InventoryComponentBase::ReplicateSubobjects(class UActorChannel *Channe
 			IsFailed |= Channel->ReplicateSubobject(ItemCore, *Bunch, *RepFlags);
 		}
 	}
+	IsFailed |= Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
 	return IsFailed;
 }

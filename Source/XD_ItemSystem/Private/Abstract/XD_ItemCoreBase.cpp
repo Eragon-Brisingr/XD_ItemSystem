@@ -117,11 +117,12 @@ void UXD_ItemCoreBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 					Number = 1;
 				}
 			}
-			else
+			else if (Number != 1)
 			{
-				if (ensure(Number < GetMinItemMergeNumberValue() && Number != 1) == false)
+				const int32 MinItemMergeNumberValue = GetMinItemMergeNumberValue();
+				if (ensure(Number >= MinItemMergeNumberValue) == false)
 				{
-					Number = 1;
+					Number = MinItemMergeNumberValue;
 				}
 			}
 		}
@@ -205,7 +206,7 @@ AXD_ItemBase* UXD_ItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Ins
 #if WITH_EDITOR
 			SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);
 #endif
-			SpawnedItem->bOnlyRelevantToOwner = true;
+			SpawnedItem->bNetUseOwnerRelevancy = true;
 			SettingSpawnedItem(SpawnedItem, ItemNumber);
 			SpawnedItem->FinishSpawning(FTransform(Rotation, Location));
 			return SpawnedItem;

@@ -52,12 +52,11 @@ void AXD_ItemBase::GetLifetimeReplicatedProps(TArray< class FLifetimeProperty > 
 
 bool AXD_ItemBase::ReplicateSubobjects(class UActorChannel *Channel, class FOutBunch *Bunch, FReplicationFlags *RepFlags)
 {
-	bool IsFailed = false;
+	bool IsFailed = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 	if (ItemCore)
 	{
 		IsFailed |= Channel->ReplicateSubobject(ItemCore, *Bunch, *RepFlags);
 	}
-	IsFailed |= Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 	return IsFailed;
 }
 
@@ -166,14 +165,13 @@ void AXD_ItemBase::InitStaticMeshComponent(UStaticMeshComponent* StaticMeshCompo
 	{
 		TSoftObjectPtr<UObject> StaticMesh = ModelData.Model;
 
-		TArray<FSoftObjectPath> ItemsToStream = { StaticMesh.ToSoftObjectPath() };
+		bool IsAllLoaded = StaticMesh.IsValid();
 		for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
 		{
-			ItemsToStream.Add(Pair.Value.ToSoftObjectPath());
+			IsAllLoaded &= Pair.Value.IsValid();
 		}
 		auto WhenAllLoaded = [=]
 		{
-			const FXD_ItemModelData& ModelData = ItemCore->GetCurrentItemModel();
 			if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(ModelData.Model.Get()))
 			{
 				StaticMeshComponent->SetStaticMesh(StaticMesh);
@@ -183,14 +181,19 @@ void AXD_ItemBase::InitStaticMeshComponent(UStaticMeshComponent* StaticMeshCompo
 				}
 			}
 		};
-		if (ItemsToStream.ContainsByPredicate([](const FSoftObjectPath& E) { return E.IsValid() == false; }))
+		if (IsAllLoaded)
 		{
-			FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-			Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, WhenAllLoaded));
+			WhenAllLoaded();
 		}
 		else
 		{
-			WhenAllLoaded();
+			FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+			TArray<FSoftObjectPath> ItemsToStream = { StaticMesh.ToSoftObjectPath() };
+			for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
+			{
+				ItemsToStream.Add(Pair.Value.ToSoftObjectPath());
+			}
+			Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, WhenAllLoaded));
 		}
 	}
 }
@@ -202,14 +205,13 @@ void AXD_ItemBase::InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMes
 	{
 		TSoftObjectPtr<UObject> SkeletalMesh = ModelData.Model;
 
-		TArray<FSoftObjectPath> ItemsToStream = { SkeletalMesh.ToSoftObjectPath() };
+		bool IsAllLoaded = SkeletalMesh.IsValid();
 		for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
 		{
-			ItemsToStream.Add(Pair.Value.ToSoftObjectPath());
+			IsAllLoaded &= Pair.Value.IsValid();
 		}
 		auto WhenAllLoaded = [=]
 		{
-			const FXD_ItemModelData& ModelData = ItemCore->GetCurrentItemModel();
 			if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(ModelData.Model.Get()))
 			{
 				SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
@@ -219,14 +221,19 @@ void AXD_ItemBase::InitSkeletalMeshComponent(USkeletalMeshComponent* SkeletalMes
 				}
 			}
 		};
-		if (ItemsToStream.ContainsByPredicate([](const FSoftObjectPath& E) { return E.IsValid() == false; }))
+		if (IsAllLoaded)
 		{
-			FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-			Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, WhenAllLoaded));
+			WhenAllLoaded();
 		}
 		else
 		{
-			WhenAllLoaded();
+			FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+			TArray<FSoftObjectPath> ItemsToStream = { SkeletalMesh.ToSoftObjectPath() };
+			for (const TPair<FName, TSoftObjectPtr<UMaterialInterface>>& Pair : ModelData.MaterialOverride)
+			{
+				ItemsToStream.Add(Pair.Value.ToSoftObjectPath());
+			}
+			Streamable.RequestAsyncLoad(ItemsToStream, FStreamableDelegate::CreateWeakLambda(this, WhenAllLoaded));
 		}
 	}
 }
