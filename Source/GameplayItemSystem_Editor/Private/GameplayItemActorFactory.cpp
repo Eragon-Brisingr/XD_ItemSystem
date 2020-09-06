@@ -71,6 +71,11 @@ bool UGameplayItemActorFactory::CanCreateActorFrom(const FAssetData& AssetData, 
 		UObject* AssetClass = AssetData.GetAsset();
 		if (UGameplayItemCoreBlueprint* Blueprint = Cast<UGameplayItemCoreBlueprint>(AssetClass))
 		{
+			if (Blueprint->GeneratedClass == nullptr)
+			{
+				return false;
+			}
+			
 			if (TSubclassOf<UGameplayItemCoreBase> ItemClass = CastChecked<UClass>(Blueprint->GeneratedClass))
 			{
 				const UGameplayItemCoreBase* ItemCore = CastChecked<UGameplayItemCoreBase>(ItemClass.GetDefaultObject());
