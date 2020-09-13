@@ -239,7 +239,7 @@ void UGameplayInventoryComponentBase::OnRep_ItemList()
 
 void UGameplayInventoryComponentBase::WhenItemCoreAdded(UGameplayItemCoreBase* AddedItemCore)
 {
-	if (ensureAlways(AddedItemCore))
+	if (ensure(AddedItemCore))
 	{
 		AddedItemCore->OwingInventory = this;
 		OnAddItem.Broadcast(AddedItemCore, AddedItemCore->Number, AddedItemCore->Number);
@@ -248,7 +248,7 @@ void UGameplayInventoryComponentBase::WhenItemCoreAdded(UGameplayItemCoreBase* A
 
 void UGameplayInventoryComponentBase::WhenItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore)
 {
-	if (ensureAlways(RemovedItemCore))
+	if (ensure(RemovedItemCore))
 	{
 		OnRemoveItem.Broadcast(RemovedItemCore, RemovedItemCore->Number, 0);
 		RemovedItemCore->WhenRemoveFromInventory(GetOwner(), RemovedItemCore->Number, 0);
