@@ -119,15 +119,16 @@ public:
 	
 	//生成实体
 public:
-	UFUNCTION(BlueprintCallable, Category = "物品")
-	AGameplayItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, FVector Location, FRotator Rotation, int32 ItemNumber = 1, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const { return SpawnItemActorInLevel(OuterLevel,Location, Rotation, ItemNumber, NAME_None, RF_NoFlags, CollisionHandling); }
-	AGameplayItemBase* SpawnItemActorInLevel(ULevel* OuterLevel, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, int32 ItemNumber = 1, const FName& Name = NAME_None, EObjectFlags InObjectFlags = RF_NoFlags, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品", meta = (WorldContext = WorldContextObject, ItemNumber = 1))
+	AGameplayItemBase* SpawnItemActorInWorld(UObject* WorldContextObject, int32 ItemNumber, FVector Location, FRotator Rotation, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
+	
+	AGameplayItemBase* SpawnItemActorInLevel(ULevel* Level, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, int32 ItemNumber = 1, const FName& Name = NAME_None, EObjectFlags InObjectFlags = RF_NoFlags, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 
-	UFUNCTION(BlueprintCallable, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品", meta = (AutoCreateRefTerm = "Location, Rotation"))
 	AGameplayItemBase* SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, const FVector& Location = FVector::ZeroVector, const FRotator& Rotation = FRotator::ZeroRotator, int32 ItemNumber = 1, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn) const;
 	
-	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject))
-	AGameplayItemBase* SpawnPreviewItemActor(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "物品", meta = (WorldContext = WorldContextObject))
+	AGameplayItemBase* SpawnPreviewItemActor(const UObject* WorldContextObject) const;
 private:
 	void SettingSpawnedItem(AGameplayItemBase* Item, int32 Number) const;
 public:

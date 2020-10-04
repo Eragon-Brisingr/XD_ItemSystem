@@ -304,15 +304,6 @@ UPrimitiveComponent* AGameplayItemBase::GetRootMeshComponent() const
 	return CastChecked<UPrimitiveComponent>(GetRootComponent());
 }
 
-UGameplayItemCoreBase* AGameplayItemBase::CreateItemCoreByType(TSubclassOf<AGameplayItemBase> ItemClass, UObject* Outer)
-{
-	if (ItemClass)
-	{
-		return ItemClass.GetDefaultObject()->CreateItemCore(Outer);
-	}
-	return nullptr;
-}
-
 FText AGameplayItemBase::GetItemName() const
 {
 	return ItemCore ? ItemCore->GetItemName() : FText::GetEmpty();

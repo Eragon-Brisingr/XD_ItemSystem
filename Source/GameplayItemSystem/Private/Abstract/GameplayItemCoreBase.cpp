@@ -150,13 +150,25 @@ const FGameplayItemModelData& UGameplayItemCoreBase::GetCurrentItemModel() const
 	return IsMergedItem() ? GetMergeItemModelValue() : GetItemModelValue();
 }
 
-AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLevel, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, int32 ItemNumber /*= 1*/, const FName& Name /*= NAME_None*/, EObjectFlags InObjectFlags /*= RF_NoFlags*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
+AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorInWorld(UObject* WorldContextObject, int32 ItemNumber, FVector Location, FRotator Rotation, ESpawnActorCollisionHandlingMethod CollisionHandling) const
 {
-	if (ensure(OuterLevel))
+	if (WorldContextObject)
+	{
+		UWorld* World = WorldContextObject->GetWorld();
+		AActor* WorldContextActor = Cast<AActor>(WorldContextObject);
+		ULevel* Level = WorldContextActor ? WorldContextActor->GetLevel() : World->PersistentLevel;
+		return SpawnItemActorInLevel(Level, Location, Rotation, ItemNumber, NAME_None, RF_NoFlags, CollisionHandling);
+	}
+	return nullptr;
+}
+
+AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorInLevel(ULevel* Level, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, int32 ItemNumber /*= 1*/, const FName& Name /*= NAME_None*/, EObjectFlags InObjectFlags /*= RF_NoFlags*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
+{
+	if (ensure(Level))
 	{
 		FActorSpawnParameters ActorSpawnParameters;
 		ActorSpawnParameters.bDeferConstruction = true;
-		ActorSpawnParameters.OverrideLevel = OuterLevel;
+		ActorSpawnParameters.OverrideLevel = Level;
 		ActorSpawnParameters.Name = Name;
 		ActorSpawnParameters.ObjectFlags = InObjectFlags;
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
@@ -167,7 +179,7 @@ AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorInLevel(ULevel* OuterLev
 			ActorSpawnParameters.bHideFromSceneOutliner = true;
 		}
 #endif
-		if (AGameplayItemBase * SpawnedItem = OuterLevel->GetWorld()->SpawnActor<AGameplayItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
+		if (AGameplayItemBase* SpawnedItem = Level->GetWorld()->SpawnActor<AGameplayItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
 		{
 #if WITH_EDITOR
 			if (!ActorSpawnParameters.Name.IsNone())
@@ -215,7 +227,7 @@ AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorForOwner(AActor* Owner, 
 	return nullptr;
 }
 
-AGameplayItemBase* UGameplayItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContextObject)
+AGameplayItemBase* UGameplayItemCoreBase::SpawnPreviewItemActor(const UObject* WorldContextObject) const
 {
 	FActorSpawnParameters ActorSpawnParameters;
 	ActorSpawnParameters.bDeferConstruction = true;
@@ -275,7 +287,7 @@ UGameplayItemCoreBase* UGameplayItemCoreBase::DeepDuplicateCore(const UObject* O
 
 void UGameplayItemCoreBase::SettingSpawnedItem(AGameplayItemBase* Item, int32 ThrowNumber) const
 {
-	Item->ItemCore = UGameplayItemCoreBase::DeepDuplicateCore(this, Item, GET_MEMBER_NAME_CHECKED(AGameplayItemBase, ItemCore));
+	Item->ItemCore = DeepDuplicateCore(this, Item, GET_MEMBER_NAME_CHECKED(AGameplayItemBase, ItemCore));
 	Item->ItemCore->Number = ThrowNumber;
 }
 

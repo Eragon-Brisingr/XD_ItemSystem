@@ -85,9 +85,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "物品")
 	UPrimitiveComponent* GetRootMeshComponent() const;
-public:
-	UFUNCTION(BlueprintPure, Category = "物品", meta = (DisplayName = "Create Item Core", DeterminesOutputType = "ItemClass"))
-	static UGameplayItemCoreBase* CreateItemCoreByType(TSubclassOf<AGameplayItemBase> ItemClass, UObject* Outer);
 
 	//获取物品属性
 public:
