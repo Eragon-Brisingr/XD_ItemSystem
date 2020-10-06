@@ -91,7 +91,7 @@ TArray<UGameplayItemCoreBase*> UGameplayInventoryComponentBase::AddItemCore(cons
 			UGameplayItemCoreBase* NewItemCore = UGameplayItemCoreBase::DeepDuplicateCore(ItemCore, this);
 			NewItemCore->Number = Number;
 			ItemCoreList.Add(NewItemCore);
-			WhenItemCoreAdded(NewItemCore);
+			NotifyItemCoreAdded(NewItemCore);
 			return { NewItemCore };
 		}
 	}
@@ -103,7 +103,7 @@ TArray<UGameplayItemCoreBase*> UGameplayInventoryComponentBase::AddItemCore(cons
 		Res.Add(NewItemCore);
 		NewItemCore->Number = 1;
 		ItemCoreList.Add(NewItemCore);
-		WhenItemCoreAdded(NewItemCore);
+		NotifyItemCoreAdded(NewItemCore);
 	}
 	return Res;
 }
@@ -125,12 +125,12 @@ int32 RemoveItemByPredicate(UGameplayInventoryComponentBase* Inventory, int32 &N
 					Number -= ItemCore->Number;
 
 					ItemCoreList.RemoveAt(i--);
-					Inventory->WhenItemCoreRemoved(ItemCore);
+					Inventory->NotifyItemCoreRemoved(ItemCore);
 				}
 				else
 				{
 					RemovedNumber += Number;
-					int32 PreNumber = ItemCore->Number;
+					const int32 PreNumber = ItemCore->Number;
 					ItemCore->Number -= Number;
 					ItemCore->OnRep_Number(PreNumber);
 				}
@@ -206,7 +206,10 @@ void UGameplayInventoryComponentBase::ClearItem()
 {
 	for (UGameplayItemCoreBase* ItemCore : ItemCoreList)
 	{
-		WhenItemCoreRemoved(ItemCore);
+		if (ensure(ItemCore))
+		{
+			NotifyItemCoreRemoved(ItemCore);
+		}
 	}
 	ItemCoreList.Empty();
 }
@@ -226,33 +229,43 @@ void UGameplayInventoryComponentBase::OnRep_ItemList()
 {
 	for (UGameplayItemCoreBase* AddItem : TSet<UGameplayItemCoreBase*>(ItemCoreList).Difference(TSet<UGameplayItemCoreBase*>(PreItemCoreList)))
 	{
-		WhenItemCoreAdded(AddItem);
+		if (ensure(AddItem))
+		{
+			NotifyItemCoreAdded(AddItem);
+		}
 	}
 
 	for (UGameplayItemCoreBase* RemoveItem : TSet<UGameplayItemCoreBase*>(PreItemCoreList).Difference(TSet<UGameplayItemCoreBase*>(ItemCoreList)))
 	{
-		WhenItemCoreRemoved(RemoveItem);
+		if (ensure(RemoveItem))
+		{
+			NotifyItemCoreRemoved(RemoveItem);
+		}
 	}
 
 	PreItemCoreList = ItemCoreList;
 }
 
-void UGameplayInventoryComponentBase::WhenItemCoreAdded(UGameplayItemCoreBase* AddedItemCore)
+void UGameplayInventoryComponentBase::NotifyItemCoreAdded(UGameplayItemCoreBase* AddedItemCore)
 {
-	if (ensure(AddedItemCore))
-	{
-		AddedItemCore->OwingInventory = this;
-		OnAddItem.Broadcast(AddedItemCore, AddedItemCore->Number, AddedItemCore->Number);
-	}
+	AddedItemCore->OwingInventory = this;
+	WhenItemCoreAdded(AddedItemCore, AddedItemCore->Number, AddedItemCore->Number);
 }
 
-void UGameplayInventoryComponentBase::WhenItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore)
+void UGameplayInventoryComponentBase::NotifyItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore)
 {
-	if (ensure(RemovedItemCore))
-	{
-		OnRemoveItem.Broadcast(RemovedItemCore, RemovedItemCore->Number, 0);
-		RemovedItemCore->WhenRemoveFromInventory(GetOwner(), RemovedItemCore->Number, 0);
-	}
+	RemovedItemCore->WhenRemoveFromInventory(GetOwner(), RemovedItemCore->Number, 0);
+	WhenItemCoreAdded(RemovedItemCore, RemovedItemCore->Number, RemovedItemCore->Number);
+}
+
+void UGameplayInventoryComponentBase::WhenItemCoreAdded(UGameplayItemCoreBase* AddedItemCore, int32 AddNumber, int32 ExistNumber)
+{
+	OnAddItem.Broadcast(AddedItemCore, AddedItemCore->Number, AddedItemCore->Number);
+}
+
+void UGameplayInventoryComponentBase::WhenItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore, int32 RemoveNumber, int32 ExistNumber)
+{
+	OnRemoveItem.Broadcast(RemovedItemCore, RemovedItemCore->Number, 0);
 }
 
 int32 UGameplayInventoryComponentBase::GetItemNumber(const AGameplayItemBase* Item) const

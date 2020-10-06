@@ -63,13 +63,17 @@ protected:
 	template<typename TPredicate>
 	friend int32 RemoveItemByPredicate(UGameplayInventoryComponentBase* Inventory, int32& Number, const TPredicate& Predicate);
 
-	void WhenItemCoreAdded(UGameplayItemCoreBase* AddedItemCore);
-	void WhenItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore);
+	void NotifyItemCoreAdded(UGameplayItemCoreBase* AddedItemCore);
+	void NotifyItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore);
+
+	friend class UGameplayItemCoreBase;
+	virtual void WhenItemCoreAdded(UGameplayItemCoreBase* AddedItemCore, int32 AddNumber, int32 ExistNumber);
+	virtual void WhenItemCoreRemoved(UGameplayItemCoreBase* RemovedItemCore, int32 RemoveNumber, int32 ExistNumber);
 public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	TArray<UGameplayItemCoreBase*> AddItemCore(const UGameplayItemCoreBase* ItemCore, int32 Number = 1);
 
-	//返回值是移除的道具数目
+	// 返回值是移除的道具数目
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	int32 RemoveItemCore(const UGameplayItemCoreBase* ItemCore, int32 Number = 1);
 
@@ -78,11 +82,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包", meta = (AllowAbstract = false))
 	TArray<UGameplayItemCoreBase*> AddItemCoreByType(TSubclassOf<UGameplayItemCoreBase> Item, int32 Number = 1);
 
-	//返回值是移除的道具数目
+	// 返回值是移除的道具数目
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	int32 RemoveItemCoreByType(TSubclassOf<UGameplayItemCoreBase> Item, int32 Number = 1);
 
-	//考虑网络的Owner
+	// 考虑网络的Owner
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "背包")
 	void GetItemFromOther(UGameplayInventoryComponentBase* OtherInventory, UGameplayItemCoreBase* ItemCore, int32 Number = 1);
 

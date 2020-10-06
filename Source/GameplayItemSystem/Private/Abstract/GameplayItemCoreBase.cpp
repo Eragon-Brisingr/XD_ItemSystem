@@ -136,11 +136,11 @@ void UGameplayItemCoreBase::OnRep_Number(int32 PreNumber)
 	{
 		if (PreNumber < Number)
 		{
-			OwingInventory->OnAddItem.Broadcast(this, Number - PreNumber, Number);
+			OwingInventory->WhenItemCoreAdded(this, Number - PreNumber, Number);
 		}
 		else
 		{
-			OwingInventory->OnRemoveItem.Broadcast(this, PreNumber - Number, Number);
+			OwingInventory->WhenItemCoreRemoved(this, PreNumber - Number, Number);
 		}
 	}
 }
