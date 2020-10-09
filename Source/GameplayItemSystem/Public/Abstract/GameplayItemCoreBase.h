@@ -61,12 +61,6 @@ struct GAMEPLAYITEMSYSTEM_API FGameplayItemCoreSparseData
 public:
 	FGameplayItemCoreSparseData();
 	
-#if WITH_EDITORONLY_DATA
-	// HACK：不明原因导致SparseData的第一个SoftObject的编辑器赋值会Crash，占位
-	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (NoGetter), AdvancedDisplay)
-	TSoftObjectPtr<UObject> HACK_SOFTOBJECT_SLOT;
-#endif
-
 	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "物品名"))
 	FText ItemNameValue;
 	UPROPERTY(EditDefaultsOnly, Category = "物品", meta = (DisplayName = "模型", GetByRef))

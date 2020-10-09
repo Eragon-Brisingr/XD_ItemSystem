@@ -294,9 +294,6 @@ void FGameplayItemCoreDetails::CustomizeDetails(class IDetailLayoutBuilder& Deta
 		{
 			DetailBuilder.HideProperty(Number_Handle);
 
-			TSharedRef<IPropertyHandle> HACK_SOFTOBJECT_SLOT_Handle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(FGameplayItemCoreSparseData, HACK_SOFTOBJECT_SLOT), FGameplayItemCoreSparseData::StaticStruct());
-			DetailBuilder.HideProperty(HACK_SOFTOBJECT_SLOT_Handle);
-
 			TSharedRef<IPropertyHandle> CanMergeItemValue_Handle = DetailBuilder.GetProperty(GET_MEMBER_NAME_CHECKED(FGameplayItemCoreSparseData, bCanMergeItemValue), FGameplayItemCoreSparseData::StaticStruct());
 			bool CanMergeItem = false;
 			CanMergeItemValue_Handle->GetValue(CanMergeItem);
