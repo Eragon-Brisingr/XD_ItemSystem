@@ -197,6 +197,7 @@ AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorInLevel(ULevel* Level, c
 
 AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorForOwner(AActor* Owner, APawn* Instigator, const FVector& Location /*= FVector::ZeroVector*/, const FRotator& Rotation /*= FRotator::ZeroRotator*/, int32 ItemNumber /*= 1*/, ESpawnActorCollisionHandlingMethod CollisionHandling /*= ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn*/) const
 {
+	const TSubclassOf<AGameplayItemBase> SpawnedItemClass = GetSpawnedItemClass(ItemNumber);
 	if (ensure(Owner))
 	{
 		FActorSpawnParameters ActorSpawnParameters;
@@ -205,7 +206,7 @@ AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorForOwner(AActor* Owner, 
 		ActorSpawnParameters.Instigator = Instigator;
 		ActorSpawnParameters.OverrideLevel = Owner->GetLevel();
 		ActorSpawnParameters.SpawnCollisionHandlingOverride = CollisionHandling;
-		ActorSpawnParameters.Name = MakeUniqueObjectName(Owner->GetLevel(), GetClass());
+		ActorSpawnParameters.Name = MakeUniqueObjectName(ActorSpawnParameters.OverrideLevel, SpawnedItemClass, *FString::Printf(TEXT("%s_%s"), *Owner->GetName(), *GetClass()->GetName()));
 #if WITH_EDITOR
 		if (FSpawnPreviewItemScope::IsSpawnPreviewItem())
 		{
@@ -213,7 +214,7 @@ AGameplayItemBase* UGameplayItemCoreBase::SpawnItemActorForOwner(AActor* Owner, 
 			ActorSpawnParameters.bHideFromSceneOutliner = true;
 		}
 #endif
-		if (AGameplayItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AGameplayItemBase>(GetSpawnedItemClass(ItemNumber), ActorSpawnParameters))
+		if (AGameplayItemBase* SpawnedItem = Owner->GetWorld()->SpawnActor<AGameplayItemBase>(SpawnedItemClass, ActorSpawnParameters))
 		{
 #if WITH_EDITOR
 			SpawnedItem->SetActorLabel(ActorSpawnParameters.Name.ToString(), false);

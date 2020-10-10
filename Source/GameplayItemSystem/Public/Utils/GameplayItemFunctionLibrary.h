@@ -60,4 +60,8 @@ public:
 		static_assert(TIsDerivedFrom<T, UGameplayItemCoreBase>::IsDerived, "T must be derived from UGameplayItemCoreBase");
 		RemoveItemNumberImpl(ArrayCast<UGameplayItemCoreBase*>(ItemCoreList), RemoveItemCore, RemoveNumber);
 	}
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "物品", meta = (WorldContext = WorldContextObject, ItemNumber = 1))
+	static AGameplayItemBase* SpawnItemActorInWorld(UObject* WorldContextObject, TSubclassOf<UGameplayItemCoreBase> ItemType, int32 ItemNumber, FVector Location, FRotator Rotation, ESpawnActorCollisionHandlingMethod CollisionHandling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 };

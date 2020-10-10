@@ -121,3 +121,12 @@ void UGameplayItemFunctionLibrary::RemoveItemNumberImpl(TArray<UGameplayItemCore
 		}
 	}
 }
+
+AGameplayItemBase* UGameplayItemFunctionLibrary::SpawnItemActorInWorld(UObject* WorldContextObject, TSubclassOf<UGameplayItemCoreBase> ItemType, int32 ItemNumber, FVector Location, FRotator Rotation, ESpawnActorCollisionHandlingMethod CollisionHandling)
+{
+	if (ItemType)
+	{
+		return ItemType.GetDefaultObject()->SpawnItemActorInWorld(WorldContextObject, ItemNumber, Location, Rotation, CollisionHandling);
+	}
+	return nullptr;
+}
